@@ -34,18 +34,17 @@ const TYPE_LABELS: Record<TransactionType, string> = {
 /** Itens por página na lista (≤ este número: sem barra de paginação). */
 const TRANSACTIONS_PAGE_SIZE = 10
 
-interface TransactionsListProps {
+interface TasksListProps {
   onEdit: (transaction: Transaction) => void
 }
 
-export default function TransactionsList({ onEdit }: TransactionsListProps) {
+export default function TasksList({ onEdit }: TasksListProps) {
   const { account, deleteTransaction } = useAccount()
 
   const [selectedType, setSelectedType] = useState<TransactionType | 'todos'>('todos')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [search, setSearch] = useState('')
-  const [showDateFilters, setShowDateFilters] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Transaction | null>(null)
   const [deleteModalVisible, setDeleteModalVisible] = useState(false)
   const deleteModalClearWebTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -59,16 +58,6 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
       }
     }
   }, [])
-
-  const hasActiveFilters = selectedType !== 'todos' || dateFrom !== '' || dateTo !== '' || search !== ''
-
-  const clearFilters = () => {
-    setSelectedType('todos')
-    setDateFrom('')
-    setDateTo('')
-    setSearch('')
-    setShowDateFilters(false)
-  }
 
   const localFiltered = useMemo(() => {
     if (!account) return []
@@ -177,13 +166,6 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
       deleteTransaction(deleteTarget.id)
     }
     closeDeleteModal()
-  }
-
-  const formatDateInput = (text: string) => {
-    let formatted = text.replace(/\D/g, '')
-    if (formatted.length > 2) formatted = `${formatted.slice(0, 2)}/${formatted.slice(2)}`
-    if (formatted.length > 5) formatted = `${formatted.slice(0, 5)}/${formatted.slice(5)}`
-    return formatted.slice(0, 10)
   }
 
   const renderItem = ({ item }: { item: Transaction }) => (
@@ -304,95 +286,11 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
         )}
       </View>
 
-      <FlatList
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        data={TYPE_CHIPS}
-        keyExtractor={(t) => t.value}
-        style={styles.chipsScroll}
-        contentContainerStyle={styles.chipsContent}
-        renderItem={({ item }) => (
-          <Pressable
-            style={[styles.chip, selectedType === item.value && styles.chipSelected]}
-            onPress={() => setSelectedType(item.value)}
-          >
-            <Text
-              style={[styles.chipText, selectedType === item.value && styles.chipTextSelected]}
-            >
-              {item.label}
-            </Text>
-          </Pressable>
-        )}
-      />
-
-      <Pressable
-        style={styles.dateToggle}
-        onPress={() => setShowDateFilters((v) => !v)}
-      >
-        <Ionicons
-          name={showDateFilters ? 'chevron-up' : 'chevron-down'}
-          size={14}
-          color="#aaa"
-        />
-        <Text style={styles.dateToggleText}>
-          {showDateFilters ? 'Ocultar filtro de data' : 'Filtrar por data'}
-        </Text>
-      </Pressable>
-
-      {showDateFilters && (
-        <View style={styles.dateRow}>
-          <View style={styles.dateField}>
-            <Text style={styles.dateLabel}>De</Text>
-            <View style={styles.dateInputWrapper}>
-              <TextInput
-                style={styles.dateInput}
-                value={dateFrom}
-                onChangeText={(t) => setDateFrom(formatDateInput(t))}
-                placeholder="DD/MM/AAAA"
-                placeholderTextColor="#666"
-                keyboardType="numeric"
-                maxLength={10}
-              />
-              {dateFrom.length > 0 && (
-                <Pressable onPress={() => setDateFrom('')} style={styles.dateClear}>
-                  <Ionicons name="close-circle" size={14} color="#666" />
-                </Pressable>
-              )}
-            </View>
-          </View>
-          <View style={styles.dateField}>
-            <Text style={styles.dateLabel}>Até</Text>
-            <View style={styles.dateInputWrapper}>
-              <TextInput
-                style={styles.dateInput}
-                value={dateTo}
-                onChangeText={(t) => setDateTo(formatDateInput(t))}
-                placeholder="DD/MM/AAAA"
-                placeholderTextColor="#666"
-                keyboardType="numeric"
-                maxLength={10}
-              />
-              {dateTo.length > 0 && (
-                <Pressable onPress={() => setDateTo('')} style={styles.dateClear}>
-                  <Ionicons name="close-circle" size={14} color="#666" />
-                </Pressable>
-              )}
-            </View>
-          </View>
-        </View>
-      )}
-
       <View style={styles.resultRow}>
         <Text style={styles.resultCount}>
           {displayedTransactions.length}{' '}
           {displayedTransactions.length === 1 ? 'transação' : 'transações'}
         </Text>
-        {hasActiveFilters && (
-          <Pressable style={styles.clearButton} onPress={clearFilters}>
-            <Ionicons name="close-circle-outline" size={13} color="#ffd33d" />
-            <Text style={styles.clearButtonText}>Limpar filtros</Text>
-          </Pressable>
-        )}
       </View>
 
       <View style={styles.listWrapper}>
@@ -406,8 +304,8 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
           renderItem={renderItem}
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <Ionicons name="wallet-outline" size={40} color="#555" />
-              <Text style={styles.emptyText}>Nenhuma transação encontrada</Text>
+              <Ionicons name="checkmark-done-outline" size={40} color="#555" />
+              <Text style={styles.emptyText}>Nenhuma tarefa encontrada</Text>
             </View>
           }
         />

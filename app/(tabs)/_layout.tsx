@@ -1,6 +1,6 @@
-import { Platform } from 'react-native'
-import { Tabs } from 'expo-router'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { Tabs } from 'expo-router'
+import { Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function TabLayout() {
@@ -27,18 +27,18 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: 'Tarefas',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'home-sharp' : 'home-outline'} color={color} size={24} />
+            <Ionicons name={focused ? 'checkmark-done-sharp' : 'checkmark-done-outline'} color={color} size={24} />
           ),
         }}
       />
       <Tabs.Screen
-        name="transacoes"
+        name="user"
         options={{
-          title: 'Transações',
+          title: 'Perfil',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'list-circle' : 'list-circle-outline'} color={color} size={24}/>
+            <Ionicons name={focused ? 'person-circle' : 'person-circle-outline'} color={color} size={24} />
           ),
         }}
       />
