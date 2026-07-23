@@ -4,7 +4,7 @@ import { ActivityIndicator } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function Index() {
-  const { account, isHydrated } = useAccount()
+  const { isHydrated } = useAccount()
 
   if (!isHydrated) {
     return (
@@ -20,10 +20,6 @@ export default function Index() {
         <ActivityIndicator size="large" color="#ffd33d" />
       </SafeAreaView>
     )
-  }
-
-  if (!account) {
-    return <Redirect href="/(auth)/login" />
   }
 
   return <Redirect href="/(tabs)" />

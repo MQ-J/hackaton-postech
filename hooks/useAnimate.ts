@@ -14,7 +14,7 @@ import { Animated } from "react-native"
  * @returns {{ opacity: Animated.Value, translateY: Animated.Value }} Valores animados utilizados para controlar opacidade e deslocamento vertical dos componentes.
  */
 export function useAnimate() {
-    const { account, isHydrated } = useAccount()
+    const { isHydrated } = useAccount()
     const isFocused = useIsFocused()
 
     const enterAnimation = useRef<Animated.CompositeAnimation | null>(null)
@@ -23,7 +23,7 @@ export function useAnimate() {
     const translateY = useRef(new Animated.Value(16)).current
 
     useEffect(() => {
-        if (!isHydrated || !account || !isFocused) {
+        if (!isHydrated || !isFocused) {
             enterAnimation.current?.stop()
             return
         }
@@ -55,7 +55,6 @@ export function useAnimate() {
             anim.stop()
         }
     }, [
-        account,
         isHydrated,
         isFocused,
         opacity,
