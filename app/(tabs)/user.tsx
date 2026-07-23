@@ -1,24 +1,21 @@
 import { Greeting } from '@/components/Greeting'
 import { PrimaryButton } from '@/components/PrimaryButton'
-import { TransactionForm } from '@/components/TransactionForm'
 import { MAX_CONTENT_WIDTH } from '@/constants/layout'
 import { useAccount } from '@/contexts/AccountContext'
-import { useAnimate } from '@/hooks/useAnimate'
 import { useTabletLayout } from '@/hooks/useTabletLayout'
 import { useRouter } from 'expo-router'
-import { ActivityIndicator, Animated, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native'
+import { ActivityIndicator, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 
 export default function UserScreen() {
-  const { account, logout, isHydrated } = useAccount()
+  const { logout, isHydrated } = useAccount()
   const router = useRouter()
   const { width } = useWindowDimensions()
   const contentWidth = Math.min(width - 32, MAX_CONTENT_WIDTH)
   const centered = width > MAX_CONTENT_WIDTH
   const { isTablet } = useTabletLayout()
 
-  const { opacity: transactionsOpacity, translateY: transactionsTranslateY } = useAnimate()
 
   const handleLogout = async () => {
     await logout()
@@ -49,21 +46,60 @@ export default function UserScreen() {
 
           <Greeting />
 
-          <Animated.View
-            style={[
-              styles.card,
-              { opacity: transactionsOpacity, transform: [{ translateY: transactionsTranslateY }] },
-            ]}
-          >
-            <Text style={styles.cardTitle}>Nova tarefa</Text>
-            <TransactionForm />
-          </Animated.View>
+          <PrimaryButton
+            label="Modo da interface"
+            variant="outline"
+            onPress={handleLogout}
+            style={styles.userOptionsButton}
+            iconName="log-out-outline"
+          />
+
+          <PrimaryButton
+            label="Tamanho da fonte"
+            variant="outline"
+            onPress={handleLogout}
+            style={styles.userOptionsButton}
+            iconName="log-out-outline"
+          />
+
+          <PrimaryButton
+            label="Contraste"
+            variant="outline"
+            onPress={handleLogout}
+            style={styles.userOptionsButton}
+            iconName="log-out-outline"
+          />
+
+          <PrimaryButton
+            label="Espaçamento"
+            variant="outline"
+            onPress={handleLogout}
+            style={styles.userOptionsButton}
+            iconName="log-out-outline"
+          />
+
+          <PrimaryButton
+            label="Feedback reforçado"
+            variant="outline"
+            onPress={handleLogout}
+            style={styles.userOptionsButton}
+            iconName="log-out-outline"
+          />
+
+
+          <PrimaryButton
+            label="Exigir confirmação"
+            variant="outline"
+            onPress={handleLogout}
+            style={styles.userOptionsButton}
+            iconName="log-out-outline"
+          />
 
           <PrimaryButton
             label="Sair"
             variant="outline"
             onPress={handleLogout}
-            style={styles.logoutButton}
+            style={styles.userOptionsButton}
             iconName="log-out-outline"
           />
         </View>
@@ -142,7 +178,7 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     marginRight: 16,
   },
-  logoutButton: {
-    marginTop: 8,
+  userOptionsButton: {
+    marginTop: 16,
   },
 })

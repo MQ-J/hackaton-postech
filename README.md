@@ -92,7 +92,7 @@ Camada compartilhada com tokens de design (tipografia, contraste, espaçamento) 
 ### Web
 | Comando | Descrição |
 | :--- | :--- |
-| `npm run dev` | Inicia o app web em `http://localhost:3000` |
+| `npm expo web` | Inicia o app web em `http://localhost:3000` |
 
 ### Mobile (Expo)
 | Plataforma | Comando / URL | Descrição |
