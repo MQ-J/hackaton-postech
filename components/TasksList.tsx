@@ -220,9 +220,9 @@ export default function TasksList({ onEdit }: TasksListProps) {
       >
         <View style={styles.deleteModalOverlay}>
           <View style={styles.deleteModalCard}>
-            <Text style={styles.deleteModalTitle}>Excluir transação</Text>
+            <Text style={styles.deleteModalTitle}>Excluir tarefa</Text>
             <Text style={styles.deleteModalMessage}>
-              Tem certeza que deseja excluir esta transação? Esta ação não pode ser
+              Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser
               desfeita.
             </Text>
             {deleteTarget ? (
@@ -289,7 +289,7 @@ export default function TasksList({ onEdit }: TasksListProps) {
       <View style={styles.resultRow}>
         <Text style={styles.resultCount}>
           {displayedTransactions.length}{' '}
-          {displayedTransactions.length === 1 ? 'transação' : 'transações'}
+          {displayedTransactions.length === 1 ? 'tarefa' : 'tarefas'}
         </Text>
       </View>
 

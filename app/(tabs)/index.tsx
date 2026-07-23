@@ -59,7 +59,7 @@ export default function TasksScreen() {
         <SafeAreaView style={styles.modalSafe}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>
-              {editingTransaction ? 'Editar Transação' : 'Nova Transação'}
+              {editingTransaction ? 'Editar Tarefa' : 'Nova Tarefa'}
             </Text>
             <Pressable onPress={closeModal} style={styles.closeButton}>
               <Ionicons name="close" size={24} color="#333" />

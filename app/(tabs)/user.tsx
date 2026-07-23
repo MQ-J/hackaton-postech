@@ -55,7 +55,7 @@ export default function UserScreen() {
               { opacity: transactionsOpacity, transform: [{ translateY: transactionsTranslateY }] },
             ]}
           >
-            <Text style={styles.cardTitle}>Nova transação</Text>
+            <Text style={styles.cardTitle}>Nova tarefa</Text>
             <TransactionForm />
           </Animated.View>
 

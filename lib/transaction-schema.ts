@@ -21,7 +21,7 @@ function parseBrDate(value: string): string | null {
 
 export const transactionSchema = z.object({
   type: z.enum(['deposito', 'transferencia', 'pagamento', 'saque'], {
-    required_error: 'Selecione o tipo de transação',
+    required_error: 'Selecione o tipo de tarefa',
   }),
 
   amount: z

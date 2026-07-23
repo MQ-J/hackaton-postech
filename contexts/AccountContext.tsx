@@ -93,7 +93,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // Espelha conta logada no storage (sem lista de transações) — só controle de sessão local.
+  // Espelha conta logada no storage (sem lista de tarefas) — só controle de sessão local.
   useEffect(() => {
     const persist = async () => {
       if (account === null) {
@@ -198,7 +198,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     )
     Toast.show({
       type: 'success',
-      text1: 'Transação adicionada com sucesso',
+      text1: 'Tarefa adicionada com sucesso',
     })
   }
 
@@ -276,7 +276,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     )
     Toast.show({
       type: 'success',
-      text1: 'Transação atualizada com sucesso',
+      text1: 'Tarefa atualizada com sucesso',
     })
   }
 

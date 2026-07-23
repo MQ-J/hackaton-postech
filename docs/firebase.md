@@ -46,7 +46,7 @@ Outros arquivos em `lib/` (`format.ts`, `transaction-schema.ts`, `types.ts`, etc
 **Contextos:**
 
 - **`contexts/AuthContext.tsx`** – `createUserWithEmailAndPassword`, `signInWithEmailAndPassword`, gravação inicial do perfil em **`users/{uid}`** no cadastro.
-- **`contexts/AccountContext.tsx`** – `onAuthStateChanged`, merge com transações da subcoleção, mutações com sync Firestore + Storage (recibos).
+- **`contexts/AccountContext.tsx`** – `onAuthStateChanged`, merge com tarefas da subcoleção, mutações com sync Firestore + Storage (recibos).
 
 ---
 
@@ -86,8 +86,8 @@ Ajuste limites e tipos conforme a necessidade do desafio ou produção.
 
 | Caminho | Conteúdo |
 | :--- | :--- |
-| **`users/{uid}`** | Perfil: `userName`, `email`, `accountNumber`, `balance`, `transactions` (espelho opcional das transações). |
-| **`accounts/{accountNumber}/transactions/{transactionId}`** | Documento da transação: `type`, `amount`, `date`, `description?`, `receiptUrl?`. |
+| **`users/{uid}`** | Perfil: `userName`, `email`, `accountNumber`, `balance`, `transactions` (espelho opcional das tarefas). |
+| **`accounts/{accountNumber}/transactions/{transactionId}`** | Documento da tarefa: `type`, `amount`, `date`, `description?`, `receiptUrl?`. |
 
 O **`accountNumber`** é gerado no cadastro (`AuthContext`) e precisa ser **o mesmo** usado na subcoleção `accounts/.../transactions`.
 
@@ -130,7 +130,7 @@ Se o upload na **web** falhar por CORS, configure CORS no bucket conforme a [doc
 1. **Cadastro:** Auth cria usuário → app grava **`users/{uid}`** com `accountNumber`.
 2. **Login:** Auth autentica → app lê **`users/{uid}`** e carrega **`accounts/{accountNumber}/transactions`** (ordenação por `date`).
 3. **Transações:** create/update/delete atualizam a subcoleção e o espelho em **`users/{uid}`** (saldo e lista resumida).
-4. **Recibos:** upload para **`receipts/{uid}/...`**; URL salva em `receiptUrl` na transação; exclusão remove o arquivo no Storage quando o recibo é removido ou a transação é apagada.
+4. **Recibos:** upload para **`receipts/{uid}/...`**; URL salva em `receiptUrl` na tarefa; exclusão remove o arquivo no Storage quando o recibo é removido ou a tarefa é apagada.
 
 ---
 

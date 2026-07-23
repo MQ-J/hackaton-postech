@@ -29,7 +29,7 @@ function transactionForUserDoc(t: Transaction): Record<string, unknown> {
   return o
 }
 
-/** Atualiza saldo e espelho de transações em `users/{uid}` (além da subcoleção `accounts/.../transactions`). */
+/** Atualiza saldo e espelho de tarefas em `users/{uid}` (além da subcoleção `accounts/.../transactions`). */
 export async function updateUserProfileFinancials(
   uid: string,
   balance: number,

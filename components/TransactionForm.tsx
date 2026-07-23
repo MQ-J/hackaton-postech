@@ -155,7 +155,7 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
       Toast.show({
         type: 'error',
         text1: 'Sessão indisponível',
-        text2: 'Faça login novamente para salvar a transação.',
+        text2: 'Faça login novamente para salvar a tarefa.',
       })
       return
     }
@@ -236,7 +236,7 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
       keyboardShouldPersistTaps="handled"
     >
       {/* Type selector */}
-      <Text style={styles.fieldLabel}>Tipo de transação</Text>
+      <Text style={styles.fieldLabel}>Tipo de tarefa</Text>
       <Controller
         control={control}
         name="type"
@@ -326,7 +326,7 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
-            placeholder="Descrição da transação"
+            placeholder="Descrição da tarefa"
             placeholderTextColor="#999"
             maxLength={120}
           />
@@ -411,7 +411,7 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
       )}
 
       <PrimaryButton
-        label={isEditMode ? 'Salvar alterações' : 'Concluir transação'}
+        label={isEditMode ? 'Salvar alterações' : 'Concluir tarefa'}
         onPress={handleSubmit(onSubmit)}
         disabled={isSubmitting || uploading}
         style={styles.submitButton}
