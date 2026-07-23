@@ -1,76 +1,104 @@
-# 📱 Lumen Financial - Mobile
+# 🧓 SeniorEase
 
-> Projeto desenvolvido como parte do Tech Challenge (Fase 4). Nesta fase, o desafio é evoluir a aplicação de gerenciamento financeiro desenvolvida na fase anterior ([Fase 3](https://github.com/MQ-J/tech-challenge-financeiro-terceira-fase)), incorporando os novos conceitos aprendidos, como padrões avançados de arquitetura front-end e Clean Architecture.
+> Projeto desenvolvido como **Hackathon** (projeto final da Pós Graduação em Front-End Engineering — POSTECH/FIAP). O desafio consiste em desenvolver, para a instituição fictícia **FIAP Inclusive**, uma plataforma **Web** e **Mobile** voltada à acessibilidade digital de pessoas idosas em ambientes acadêmicos e profissionais.
+
+---
+
+## 📋 Tema do Hackathon: Acessibilidade para Idosos em Plataformas Digitais
+
+Muitos usuários da terceira idade enfrentam desafios como perda gradual de memória, dificuldades de visão, redução da coordenação motora fina, menor familiaridade com padrões modernos de navegação, insegurança ao utilizar plataformas digitais e dificuldade em compreender fluxos complexos.
+
+O **SeniorEase** nasce para resolver isso, promovendo **autonomia, confiança e inclusão digital**.
 
 ---
 
-## Tech Challenge - Fase 4: Requisitos do desafio
+## ✅ Requisitos do desafio
 
-### Refatoração e Melhoria da Arquitetura
+### Painel de Personalização da Experiência
+- [ ] Ajuste de tamanho da fonte
+- [ ] Ajuste de nível de contraste
+- [ ] Ajuste de espaçamento entre elementos
+- [ ] Simplificação da interface (modo básico / modo avançado)
+- [ ] Ativação de feedback visual reforçado
+- [ ] Confirmação adicional antes de ações críticas
 
-- [X] Aplicar padrões de arquitetura modular para uma melhor organização 
-do código.
-- [X] Implementar State Management Patterns avançados para otimizar o gerenciamento do estado da aplicação.
-- [X] Separar as camadas de apresentação, domínio e infraestrutura, 
-seguindo os princípios da Clean Architecture.
+### Organizador de Atividades Simplificado
+- [ ] Lista de tarefas com visual simples e direto
+- [ ] Etapas guiadas para execução de atividades
+- [ ] Lembretes com linguagem clara
+- [ ] Avisos de conclusão com feedback positivo
+- [ ] Histórico simples de atividades realizadas
 
-### Performance e Otimização
+### Perfil do Usuário + Configurações Persistentes
+- [ ] Tamanho de fonte escolhido
+- [ ] Nível de contraste
+- [ ] Modo de navegação (simplificado ou padrão)
+- [ ] Necessidade de confirmações extras
+- [ ] Preferências de lembretes e notificações
 
-- [X] Melhorar o tempo de carregamento da aplicação aplicando estratégias 
-de lazy loading e pré-carregamento.
-- [X] Utilizar técnicas de Programação Reativa para tornar a interface mais 
-responsiva e eficiente.
+### Arquitetura
+- [ ] Separação clara entre módulos (painel, tarefas, perfil, configurações)
+- [ ] Comunicação entre microapps (se utilizado)
+- [ ] Camada de domínio isolada (Clean Architecture)
+- [ ] Casos de uso independentes de UI
+- [ ] Adaptadores e interfaces bem definidos
 
-### Tecnologias e conceitos a serem utilizados
-
-#### Arquitetura Front-end Moderna
-
-- [X] melhoria na organização do código 
-seguindo Clean Architecture.
-
----
+### Acessibilidade para Idosos (obrigatório)
+- [ ] Ajustes reais de legibilidade (fonte, contraste, espaçamento)
+- [ ] Botões e áreas clicáveis ampliadas
+- [ ] Feedback claro após cada ação
+- [ ] Redução de complexidade visual
+- [ ] Navegação previsível
+- [ ] Fluxos guiados passo a passo
+- [ ] Animações suaves e controláveis
 
 ### Material para a entrega
-
-- [X] Link do repositório Git do projeto.
-- [X] README contendo as tecnologias utilizadas e o passo a passo para rodar a aplicação localmente.
-- [X] Um vídeo de até 5 (cinco) minutos demonstrando as principais 
-funcionalidades.
+- [ ] Link do(s) repositório(s) Git do projeto (Web e Mobile)
+- [ ] README com tecnologias utilizadas e passo a passo para rodar localmente
+- [ ] Vídeo explicativo (até 15 min) demonstrando decisões e features
+- [ ] Link do vídeo e do projeto em arquivo `.docx` ou `.txt` na plataforma FIAP
 
 ---
 
 ## 🧱 Arquitetura em camadas
-<img src="infra.png"/>
 
-## ✨ Melhorias implementadas
+Camadas seguindo **Clean Architecture**, compartilhadas conceitualmente entre Web e Mobile:
 
-### 🌊 useAnimate
-Hook para agrupar a responsabilidade pelas animações da aplicação. 
+- **Domain** — entidades e casos de uso (regras de negócio, independentes de UI/framework)
+- **Data / Infra** — implementações concretas de repositórios, integração com backend
+- **Presentation** — telas, componentes e state management
+- **Shared / Core** — configurações de acessibilidade, temas e utilitários comuns
 
-- A animações ocorrem após os dados do usuário em `account` serem definidos.
-- As animações da opacidade e eixo Y rodam em paralelo, com um delay de **100ms**.
+---
 
-### 📱 useTabletLayout
-Hook responsável por definir a regra de layout em tablets.
+## ✨ Módulos principais
 
-### ⚙️ firebase/actions
-Funções responsáveis pela conexão com o banco utilizado. Neste caso, o Firebase.
+### 🎛️ Painel de Personalização
+Módulo responsável por permitir que o usuário ajuste fonte, contraste, espaçamento e nível de simplificação da interface. As preferências são persistidas no perfil do usuário e aplicadas globalmente na aplicação.
 
-- **signOutSection:** Realiza o encerramento da sessão do usuário autenticado.
-- **onAuthStateChangedListener:** Monitora alterações no estado de autenticação do usuário.
-- **conectionErrorMessage:** Converte erros de autenticação em mensagens amigáveis para exibição ao usuário.
+### 🗂️ Organizador de Atividades
+Módulo de tarefas com fluxo guiado passo a passo, linguagem simples, lembretes e feedback positivo após conclusão de cada etapa.
 
-### 🛑 useDeferredMount
-Útil para adiar a montagem de componentes pesados para após o primeiro frame visível, melhorando o tempo de resposta inicial.
+### 👤 Perfil e Configurações
+Módulo responsável por armazenar e sincronizar as preferências de acessibilidade e notificação do usuário entre sessões e dispositivos.
+
+### ♿ Core de Acessibilidade
+Camada compartilhada com tokens de design (tipografia, contraste, espaçamento) consumidos por todos os módulos, garantindo coerência visual e cognitiva entre Web e Mobile.
+
+---
 
 ## 🔗 Acesso rápido (ambiente local)
 
-Após iniciar o projeto (veja **Getting Started** abaixo):
+### Web
+| Comando | Descrição |
+| :--- | :--- |
+| `npm run dev` | Inicia o app web em `http://localhost:3000` |
 
+### Mobile (Expo)
 | Plataforma | Comando / URL | Descrição |
 | :--- | :--- | :--- |
-| **📱 Expo Go** | `npx expo start` e escanear QR code | App no dispositivo físico. **Use a mesma rede Wi‑Fi do PC** (modo LAN); em dados móveis o QR costuma apontar para um IP local inacessível. Alternativa: `npx expo start --tunnel`. |
-| **🌐 Web** | `npx expo start --web` → `http://localhost:8081` | Versão web (React Native Web). |
+| **📱 Expo Go** | `npx expo start` e escanear QR code | App no dispositivo físico. Use a mesma rede Wi-Fi do PC (modo LAN); em dados móveis prefira `npx expo start --tunnel`. |
+| **🌐 Web (Expo)** | `npx expo start --web` → `http://localhost:8081` | Versão web via React Native Web (opcional). |
 | **🤖 Android** | `npx expo start --android` | Emulador ou dispositivo Android. |
 | **🍎 iOS** | `npx expo start --ios` | Simulador ou dispositivo iOS (macOS). |
 
@@ -80,139 +108,105 @@ Após iniciar o projeto (veja **Getting Started** abaixo):
 
 | Área | Tecnologias |
 | :--- | :--- |
-| **Core** | React 19, React Native 0.81, Expo SDK 54 |
-| **Linguagem** | TypeScript 5 |
-| **Navegação** | Expo Router 6, React Navigation 7 (`@react-navigation/native`, bottom tabs) |
-| **Animações (dashboard)** | React Native `Animated` + `useNativeDriver`; foco de aba com `useIsFocused` (`@react-navigation/native`) |
-| **Formulários e validação** | React Hook Form, Zod, @hookform/resolvers |
-| **Estado** | Context API (AccountContext) |
-| **Backend / cloud** | **Firebase** (`firebase` SDK: Auth, Firestore, Storage) |
-| **Segurança / local** | expo-secure-store, crypto-js (storage local); `react-native-bcrypt` em utilitários legados |
-| **UI e feedback** | expo-linear-gradient, react-native-toast-message, @expo/vector-icons, react-native-svg, react-native-gifted-charts |
-| **Layout** | React Native StyleSheet, breakpoint tablet (constants/layout), `react-native-safe-area-context` (SafeAreaProvider / SafeAreaView / insets) |
-| **Outras libs RN (Expo)** | `react-native-reanimated` (stack Expo; animações do dashboard usam `Animated` nativo) |
+| **Web** | Next.js, React 19, TypeScript |
+| **Mobile** | React Native 0.81, Expo SDK 54, TypeScript |
+| **Arquitetura** | Clean Architecture (Domain / Data / Presentation), módulos independentes |
+| **Estado** | Context API / hooks de estado por módulo |
+| **Formulários e validação** | React Hook Form, Zod |
+| **Backend / cloud** | Firebase (Auth, Firestore, Storage) |
+| **Acessibilidade** | Tokens de design (fonte, contraste, espaçamento), `react-native-safe-area-context`, ARIA (web) |
+| **UI e feedback** | Componentes de feedback visual reforçado, animações suaves e controláveis |
+| **Testes** | Jest / Testing Library |
+| **CI/CD** | GitHub Actions |
 
 ---
 
 ## 🚀 Getting Started – Como executar o projeto
 
 ### Pré-requisitos
-
 - Node.js >= 18
 - npm >= 8
-- [Expo Go](https://expo.dev/go) instalado no celular (para testar no dispositivo) ou emulador Android/iOS
+- [Expo Go](https://expo.dev/go) instalado no celular (para testar a versão mobile) ou emulador Android/iOS
 
-### Instalação e execução
+### Web
 
 ```bash
-# Clone o repositório (se ainda não tiver)
-git clone <url-do-repositorio>
+# Clone o repositório
+git clone <url-do-repositorio-web>
 
 # Instalar dependências
 npm install
 
-# Iniciar o app (Expo)
+# Iniciar o app
+npm run dev
+```
+
+### Mobile (Expo)
+
+```bash
+# Clone o repositório
+git clone <url-do-repositorio-mobile>
+
+# Instalar dependências
+npm install
+
+# Iniciar o app
 npx expo start
 ```
 
 Utilize o QR code no terminal para abrir no **Expo Go** ou as teclas do CLI para abrir em **web**, **Android** ou **iOS**.
 
-### Firebase (obrigatório para login, transações e recibos)
+### Firebase (backend compartilhado)
 
-1. Crie um projeto no [Firebase Console](https://console.firebase.google.com/) e ative **Authentication** (e-mail/senha), **Firestore** e **Storage**.
-2. Copie as chaves do SDK para `firebase/config.ts` (ou use variáveis `EXPO_PUBLIC_*` se o grupo adotar `.env`).
-3. Publique as **regras do Storage** conforme o arquivo `firebase/storage.rules` (Console → Storage → Rules).
-4. Configure **regras do Firestore** (perfil `users/{uid}` e subcoleção `accounts/{accountId}/transactions`) — exemplo no guia abaixo.
-
-**Guia passo a passo (Console, modelo de dados, arquivos `lib/` e regras):**  
-[Documentação Firebase](docs/firebase.md)
+1. Crie um projeto no [Firebase Console](https://console.firebase.google.com/) e ative **Authentication**, **Firestore** e **Storage**.
+2. Copie as chaves do SDK para o arquivo de configuração de cada app (web e mobile).
+3. Configure as **regras do Firestore** e **Storage** para as coleções de perfil, preferências de acessibilidade e atividades.
 
 ---
 
-## 📂 Estrutura do projeto
-
-Formato enxuto, no estilo do desafio:
+## 📂 Estrutura do projeto (proposta)
 
 ```text
-tech-challenge-financeiro-quarta-fase/
+seniorease/
+├── apps/
+│   ├── web/                     # Aplicação Next.js
+│   └── mobile/                  # Aplicação Expo / React Native
+├── packages/
+│   ├── domain/                  # Entidades e casos de uso (Clean Architecture)
+│   ├── data/                    # Repositórios e integração com Firebase
+│   └── shared-ui/               # Tokens de acessibilidade e componentes compartilhados
 ├── docs/
-│   └── firebase.md                           # Documentação Firebase, Firestore/Storage, guias de configuração
-├── firebase/
-│   ├── config.ts                             # initializeApp + Auth (web vs native com AsyncStorage persistence)
-│   ├── actions.ts                            # Funções Firebase Auth (login, logout, listeners, sign-out)
-│   └── storage.rules                         # Regras Storage (estrutura e permissões de acesso)
-├── app/                                      # Rotas (Expo Router)
-│   ├── _layout.tsx                           # Layout raiz (Stack, AccountProvider, AuthProvider, Toast)
-│   ├── index.tsx                             # Redireciona para login ou (tabs) conforme auth
-│   ├── +not-found.tsx                        # Página 404
-│   ├── (auth)/                               # Grupo de rotas não autenticadas
-│   │   ├── _layout.tsx                       # Stack sem header (auth group)
-│   │   └── login.tsx                         # Tela de login + modais (Entrar / Abrir conta)
-│   └── (tabs)/                               # Grupo de rotas autenticadas
-│       ├── _layout.tsx                       # Bottom tabs (Dashboard, Transações)
-│       ├── index.tsx                         # Home pós-login (Dashboard com saldo)
-│       └── transacoes.tsx                    # Listagem, filtros e criação de transações
-├── components/                               # Componentes reutilizáveis
-│   ├── BalanceCard.tsx                       # Card de saldo/balanço
-│   ├── Greeting.tsx                          # Saudação personalizadas (ex: "Olá, Nome")
-│   ├── InfosCard.tsx                         # Card de informações (benefícios, dicas na login)
-│   ├── Checkbox.tsx                          # Checkbox customizado (termos, aceitar)
-│   ├── TextInputField.tsx                    # Input reutilizável com ícone e validação
-│   ├── PrimaryButton.tsx                     # Botão primário/outline
-│   ├── LoginForm.tsx                         # Formulário login
-│   ├── RegisterForm.tsx                      # Formulário cadastro/registro
-│   ├── TransactionForm.tsx                   # Formulário criação/edição de transação
-│   ├── TransactionsList.tsx                  # Lista completa de transações com filtros e paginação (10/página)
-│   ├── RecentTransactions.tsx                # Widget de transações recentes (resumo)
-│   ├── RecentTransactionRow.tsx              # Linha individual de transação no widget
-│   └── charts/
-│       ├── ChartsNative.tsx                  # Wrapper/container para gráficos
-│       ├── BarChartTransactionsNative.tsx    # Gráfico de barras (transações por período)
-│       └── PieChartExpensesNative.tsx        # Gráfico de pizza (despesas por categoria)
-├── contexts/
-│   ├── AccountContext.tsx                    # Estado da conta (saldo, transações, CRUD transações)
-│   │                                         # Sincroniza Firestore + Storage (metadados locais)
-│   └── AuthContext.tsx                       # Firebase Auth (login, cadastro) + perfil Firestore
-├── lib/
-│   ├── firebase.ts                           # getFirestore + getStorage (compartilha config.ts)
-│   ├── firestore.ts                          # CRUD transações subcoleção + sync users/{uid}
-│   ├── user-account-from-firestore.ts        # Fetch e mapeamento perfil Firestore → Account
-│   ├── receipt-storage.ts                    # Upload/delete recibos no Firebase Storage
-│   ├── storage.ts                            # SecureStore + fallback web (metadados transações)
-│   ├── types.ts                              # Types: Account, Transaction, TransactionType, FirestoreUserProfile
-│   ├── auth.ts                               # Utilitários bcrypt (legacy)
-│   ├── firebase-auth-messages.ts             # Mapeamento mensagens erro Firebase Auth (PT-BR)
-│   ├── format.ts                             # Formatadores (moeda, data, etc)
-│   ├── transaction-schema.ts                 # Validação Zod para transações
-│   └── chartData.ts                          # Processamento dados para gráficos
-├── constants/
-│   └── layout.ts                             # TABLET_BREAKPOINT, MAX_CONTENT_WIDTH, FOOTER_HEIGHT
-├── hooks/
-│   ├── useAnimate.ts                         # Hook animações (Animated API)
-│   ├── useDeferredMount.ts                   # Aguarda hydration antes renderizar
-│   └── useTabletLayout.ts                    # Detecta layout tablet vs mobile
-├── assets/
-│   └── images/                               # Imagens, ícones, recursos estáticos
-├── theme/
-│   └── colors.ts                             # Paleta de cores (tema)
-├── app.json                                  # Configuração Expo (nome, versão, plugins)
-├── expo-env.d.ts                             # Type definitions Expo environment
-├── tsconfig.json                             # TypeScript config
-├── eslint.config.js                          # ESLint rules
-├── package.json                              # Dependências (React Native, Firebase, Zod, RHF, etc)
-└── README.md                                 # Documentação do projeto
+│   └── firebase.md              # Documentação Firebase / modelo de dados
+└── README.md                    # Documentação do projeto
 ```
+
+> Estrutura sugerida para monorepo. Caso os times optem por repositórios separados para Web e Mobile, mantenha a mesma organização interna (domain / data / presentation) em cada um.
 
 ---
 
 ## 📜 Scripts Disponíveis
 
-### Aplicação (Expo)
+### Web
+```bash
+npm run dev       # Inicia o servidor de desenvolvimento
+npm run build     # Build de produção
+npm run lint      # Executa linting
+npm run test      # Executa os testes
+```
+
+### Mobile (Expo)
 ```bash
 npm run start     # Inicia o Expo (npx expo start)
 npm run android   # Inicia e abre no emulador/dispositivo Android
 npm run ios       # Inicia e abre no simulador/dispositivo iOS
-npm run web       # Inicia e abre no navegador (atalho para npx expo start --web)
+npm run web       # Inicia e abre no navegador
 npm run lint      # Executa linting (expo lint)
-npx expo start -c # Inicia o Expo limpando o cache (útil para resolver problemas de build/cache)
+npx expo start -c # Inicia o Expo limpando o cache
 ```
+
+---
+
+## 🎥 Entrega
+
+- Repositório(s) Git: `<link>`
+- Vídeo demonstrativo (até 15 min): `<link>`
