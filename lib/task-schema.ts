@@ -14,12 +14,19 @@ export const taskSchema = z.object({
     .string()
     .max(120, 'Título deve ter no máximo 120 caracteres')
     .optional(),
-
   description: z
     .string()
     .max(120, 'Descrição deve ter no máximo 120 caracteres')
     .optional(),
-
+  items: z.array(
+    z.object({
+      id: z.string().optional(),
+      description: z
+        .string()
+        .max(120, 'Descrição do item deve ter no máximo 120 caracteres'),
+      checked: z.boolean(),
+    }),
+  ),
 })
 
 export type TaskFormValues = z.infer<typeof taskSchema>

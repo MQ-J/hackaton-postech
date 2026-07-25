@@ -9,13 +9,21 @@ import type { Task } from '@/lib/types'
 import { theme } from '@/theme/colors'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
-import { Controller, useForm } from 'react-hook-form'
 import {
+  Controller,
+  useFieldArray,
+  useForm,
+} from 'react-hook-form'
+import {
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  TextInputKeyPressEvent,
+  View,
 } from 'react-native'
+
 import Toast from 'react-native-toast-message'
 
 interface TaskFormProps {
@@ -38,7 +46,16 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
     defaultValues: {
       title: task?.title ?? '',
       description: task?.description ?? '',
+      items: task?.items?.map((item) => ({
+        description: item.description,
+        checked: item.checked,
+      })) || [{}],
     },
+  })
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'items',
   })
 
   useEffect(() => {
@@ -46,11 +63,16 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
       reset({
         title: task.title ?? '',
         description: task.description ?? '',
+        items: task.items?.map((item) => ({
+          description: item.description,
+          checked: item.checked,
+        })) ?? [],
       })
     } else {
       reset({
         title: '',
         description: '',
+        items: [{}],
       })
     }
   }, [task, reset])
@@ -77,19 +99,23 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
 
     const presetId = isEditMode && task ? task.id : Date.now().toString()
 
-    const basePayload = {
-      title: values.title?.trim(),
-      description:
-        (values.description?.trim()),
+    const itemsPayload: Task['items'] = (values.items ?? []).map((item, index) => ({
+      id: item.id ?? `${Date.now()}-${index}`,
+      description: item.description.trim(),
+      checked: item.checked,
+    }))
+
+    const basePayload: Omit<Task, 'id'> = {
+      title: values.title?.trim() || undefined,
+      description: values.description?.trim() || undefined,
+      items: itemsPayload,
     }
 
     if (isEditMode && task) {
-
       updateTask(task.id, basePayload)
     } else {
       const newTask: Omit<Task, 'id'> = {
         ...basePayload,
-        items: [],
       }
       addTask(newTask, presetId)
     }
@@ -97,6 +123,14 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
     reset()
     onSuccess?.()
   }
+
+  const handleKeyPress = (e: TextInputKeyPressEvent) => {
+    const pressedKey = e.nativeEvent.key;
+
+    if (pressedKey === 'Enter') {
+      append({ description: '', checked: false });
+    }
+  };
 
   return (
     <ScrollView
@@ -115,6 +149,7 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
+            onKeyPress={handleKeyPress}
             placeholder="Título da tarefa"
             placeholderTextColor="#999"
             maxLength={120}
@@ -146,8 +181,45 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
         <Text style={styles.errorText}>{errors.description.message}</Text>
       )}
 
+      <Text style={styles.fieldLabel}>Itens da lista</Text>
+      {fields.map((field, index) => (
+        <View key={field.id} style={styles.itemRow}>
+          <Controller
+            control={control}
+            name={`items.${index}.description`}
+            render={({ field: { value, onChange, onBlur } }) => (
+              <TextInput
+                style={[
+                  styles.input,
+                  styles.itemInput,
+                  errors.items?.[index]?.description && styles.inputError,
+                ]}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                placeholder={`Item ${index + 1}`}
+                placeholderTextColor="#999"
+                maxLength={120}
+              />
+            )}
+          />
+          <Pressable onPress={() => remove(index)} style={styles.removeButton}>
+            <Text style={styles.removeButtonText}>Remover</Text>
+          </Pressable>
+        </View>
+      ))}
+      {errors.items?.message ? (
+        <Text style={styles.errorText}>{errors.items.message}</Text>
+      ) : null}
+
       <PrimaryButton
-        label={isEditMode ? 'Salvar alterações' : 'Concluir tarefa'}
+        label="Adicionar item"
+        onPress={() => append({ description: '', checked: false })}
+        style={styles.addItemButton}
+      />
+
+      <PrimaryButton
+        label={isEditMode ? 'Salvar alterações' : 'Salvar lista'}
         onPress={handleSubmit(onSubmit)}
         disabled={isSubmitting}
         style={styles.submitButton}
@@ -242,6 +314,23 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     color: '#333',
   },
+  itemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  itemInput: {
+    flex: 1,
+  },
+  removeButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
+  removeButtonText: {
+    color: '#dc2626',
+    fontSize: 14,
+    fontWeight: '600',
+  },
   inputError: {
     borderColor: '#dc2626',
   },
@@ -311,7 +400,11 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingBottom: 32,
   },
+  addItemButton: {
+    marginTop: 4,
+  },
   submitButton: {
     marginTop: 16,
+    backgroundColor: '#ffd33d',
   },
 })

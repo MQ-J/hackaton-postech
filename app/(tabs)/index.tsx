@@ -47,7 +47,7 @@ export default function TasksScreen() {
 
       {/* FAB */}
       <Pressable style={styles.fab} onPress={openAdd}>
-        <Ionicons name="add" size={28} color="#25292e" />
+        <Ionicons name="add" size={28} color="#25292e" /> <Text>Nova lista</Text>
       </Pressable>
 
       {/* Add / Edit Modal */}
@@ -59,7 +59,7 @@ export default function TasksScreen() {
         <SafeAreaView style={styles.modalSafe}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>
-              {editingTask ? 'Editar Tarefa' : 'Nova Tarefa'}
+              {editingTask ? 'Editar lista' : 'Nova lista'}
             </Text>
             <Pressable onPress={closeModal} style={styles.closeButton}>
               <Ionicons name="close" size={24} color="#333" />
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 28,
     right: 24,
-    width: 45,
+    width: 105,
     height: 45,
     borderRadius: 28,
     backgroundColor: '#ffd33d',
