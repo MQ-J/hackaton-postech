@@ -1,16 +1,15 @@
 import { onAuthStateChangedListener, signOutSection } from '@/firebase/actions'
 import { auth } from '@/firebase/config'
 import {
-  addTransactionDoc,
-  deleteTransactionDoc,
-  fetchAllTransactions,
-  updateTransactionDoc,
-  updateUserProfileFinancials,
-  type TransactionDocUpdate,
+  addTaskDoc,
+  deleteTaskDoc,
+  fetchAllTasks,
+  updateTaskDoc,
+  updateUserProfileTasks,
+  type TaskDocUpdate,
 } from '@/lib/firestore'
-import { deleteReceiptFromFirebaseIfPresent } from '@/lib/receipt-storage'
 import { removeSecureItem, setSecureItem } from '@/lib/storage'
-import type { Account, Transaction } from '@/lib/types'
+import type { Account, Task } from '@/lib/types'
 import { fetchUserAccountDocument } from '@/lib/user-account-from-firestore'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import Toast from 'react-native-toast-message'
@@ -19,33 +18,30 @@ interface AccountContextType {
   account: Account | null
   login: (accountData: Account) => Promise<void>
   logout: () => Promise<void>
-  addTransaction: (transactionData: Omit<Transaction, 'id'>, presetId?: string) => void
-  updateTransaction: (id: string, updatedData: TransactionDocUpdate) => void
-  deleteTransaction: (id: string) => void
+  addTask: (taskData: Omit<Task, 'id'>, presetId?: string) => void
+  updateTask: (id: string, updatedData: TaskDocUpdate) => void
+  deleteTask: (id: string) => void
   isHydrated: boolean
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined)
 
-async function mergeWithSubcollectionTransactions(
+async function mergeWithSubcollectionTasks(
   accountData: Account,
 ): Promise<Account> {
   try {
-    const transactions = await fetchAllTransactions(accountData.accountNumber)
-    if (transactions.length > 0) {
-      const balance = transactions.reduce((sum, t) => sum + t.amount, 0)
-      return { ...accountData, transactions, balance }
+    const tasks = await fetchAllTasks(accountData.accountNumber)
+    if (tasks.length > 0) {
+      return { ...accountData, tasks }
     }
     return {
       ...accountData,
-      transactions: accountData.transactions ?? [],
-      balance: accountData.balance,
+      tasks: accountData.tasks ?? [],
     }
   } catch {
     return {
       ...accountData,
-      transactions: accountData.transactions ?? [],
-      balance: accountData.balance,
+      tasks: accountData.tasks ?? [],
     }
   }
 }
@@ -75,10 +71,10 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
           user.uid,
           user.email ?? '',
         )
-        const merged = await mergeWithSubcollectionTransactions(base)
+        const merged = await mergeWithSubcollectionTasks(base)
         if (cancelled) return
         setAccount(merged)
-        const { transactions: _, ...meta } = merged
+        const { tasks: _, ...meta } = merged
         await setSecureItem('currentAccount', meta)
       } catch {
         if (!cancelled) setAccount(null)
@@ -99,7 +95,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
       if (account === null) {
         return
       }
-      const { transactions: _, ...meta } = account
+      const { tasks: _, ...meta } = account
       await setSecureItem('currentAccount', meta)
     }
     void persist()
@@ -108,19 +104,18 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   const login = async (accountData: Account) => {
     const uid = accountData.uid ?? auth.currentUser?.uid
     const withUid = uid ? { ...accountData, uid } : accountData
-    setAccount({ ...withUid, transactions: [] })
+    setAccount({ ...withUid, tasks: [] })
     try {
-      const merged = await mergeWithSubcollectionTransactions(withUid)
+      const merged = await mergeWithSubcollectionTasks(withUid)
       setAccount(merged)
-      const { transactions: _, ...meta } = merged
+      const { tasks: _, ...meta } = merged
       await setSecureItem('currentAccount', meta)
     } catch {
       setAccount((prev) =>
         prev
           ? {
             ...prev,
-            transactions: withUid.transactions,
-            balance: withUid.balance,
+            tasks: withUid.tasks,
           }
           : prev,
       )
@@ -146,10 +141,9 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     try {
       await subcollectionOp()
       if (uid) {
-        await updateUserProfileFinancials(
+        await updateUserProfileTasks(
           uid,
-          next.balance,
-          next.transactions,
+          next.tasks,
         )
       }
       await afterSuccess?.()
@@ -163,38 +157,25 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const addTransaction = (
-    transactionData: Omit<Transaction, 'id'>,
+  const addTask = (
+    taskData: Omit<Task, 'id'>,
     presetId?: string,
   ) => {
     if (!account) return
 
-    const newTransaction: Transaction = {
-      ...transactionData,
+    const newTask: Task = {
+      ...taskData,
       id: presetId ?? Date.now().toString(),
-    }
-
-    if (
-      newTransaction.amount < 0 &&
-      account.balance + newTransaction.amount < 0
-    ) {
-      Toast.show({
-        type: 'error',
-        text1: 'Saldo insuficiente',
-        text2: 'Você não possui saldo suficiente para realizar esta operação.',
-      })
-      return
     }
 
     const next: Account = {
       ...account,
-      balance: account.balance + newTransaction.amount,
-      transactions: [newTransaction, ...account.transactions],
+      tasks: [newTask, ...account.tasks],
     }
 
     setAccount(next)
     void syncFirebaseAfterMutation(next, () =>
-      addTransactionDoc(account.accountNumber, newTransaction),
+      addTaskDoc(account.accountNumber, newTask),
     )
     Toast.show({
       type: 'success',
@@ -202,77 +183,29 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     })
   }
 
-  const updateTransaction = (id: string, updatedData: TransactionDocUpdate) => {
+  const updateTask = (id: string, updatedData: TaskDocUpdate) => {
     if (!account) return
 
-    const transactionToUpdate = account.transactions.find((t) => t.id === id)
-    if (!transactionToUpdate) return
+    const taskToUpdate = account.tasks.find((t) => t.id === id)
+    if (!taskToUpdate) return
 
-    const prevReceiptUrl = transactionToUpdate.receiptUrl
-    const oldFirebaseReceipt =
-      prevReceiptUrl?.includes('firebasestorage.googleapis.com') === true
-        ? prevReceiptUrl
-        : null
-    let deleteOldReceiptAfterSync = false
-    if (oldFirebaseReceipt) {
-      if (updatedData.receiptUrl === null) {
-        deleteOldReceiptAfterSync = true
-      } else if (
-        typeof updatedData.receiptUrl === 'string' &&
-        updatedData.receiptUrl !== oldFirebaseReceipt
-      ) {
-        deleteOldReceiptAfterSync = true
-      }
-    }
-
-    const oldAmount = transactionToUpdate.amount
-    const newAmount = updatedData.amount ?? oldAmount
-    const balanceDifference = newAmount - oldAmount
-    const potentialNewBalance = account.balance + balanceDifference
-
-    if (potentialNewBalance < 0) {
-      Toast.show({
-        type: 'error',
-        text1: 'Saldo insuficiente',
-        text2: 'Você não possui saldo suficiente para realizar esta operação.',
-      })
-      return
-    }
-
-    let balanceDiff = 0
-    const newTransactions = account.transactions.map((t) => {
+    const newTasks = account.tasks.map((t) => {
       if (t.id !== id) return t
 
-      const prevAmount = t.amount
-      const nextAmount = updatedData.amount ?? prevAmount
-      balanceDiff = nextAmount - prevAmount
+      const mergedBase: Task = { ...t, ...updatedData, id }
 
-      const { receiptUrl: patchReceipt, ...patchRest } = updatedData
-      const mergedBase: Transaction = { ...t, ...patchRest, id }
-
-      if (patchReceipt === null) {
-        const { receiptUrl: _removed, ...rest } = mergedBase
-        return rest
-      }
-      if (typeof patchReceipt === 'string') {
-        return { ...mergedBase, receiptUrl: patchReceipt }
-      }
       return mergedBase
     })
 
     const next: Account = {
       ...account,
-      balance: account.balance + balanceDiff,
-      transactions: newTransactions,
+      tasks: newTasks,
     }
 
     setAccount(next)
     void syncFirebaseAfterMutation(
       next,
-      () => updateTransactionDoc(account.accountNumber, id, updatedData),
-      deleteOldReceiptAfterSync
-        ? () => deleteReceiptFromFirebaseIfPresent(oldFirebaseReceipt)
-        : undefined,
+      () => updateTaskDoc(account.accountNumber, id, updatedData), undefined,
     )
     Toast.show({
       type: 'success',
@@ -280,27 +213,21 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     })
   }
 
-  const deleteTransaction = (id: string) => {
+  const deleteTask = (id: string) => {
     if (!account) return
 
-    const transactionToDelete = account.transactions.find((t) => t.id === id)
-    if (!transactionToDelete) return
-
-    const receiptUrlToDelete = transactionToDelete.receiptUrl
+    const taskToDelete = account.tasks.find((t) => t.id === id)
+    if (!taskToDelete) return
 
     const next: Account = {
       ...account,
-      balance: account.balance - transactionToDelete.amount,
-      transactions: account.transactions.filter((t) => t.id !== id),
+      tasks: account.tasks.filter((t) => t.id !== id),
     }
 
     setAccount(next)
     void syncFirebaseAfterMutation(
       next,
-      () => deleteTransactionDoc(account.accountNumber, id),
-      receiptUrlToDelete
-        ? () => deleteReceiptFromFirebaseIfPresent(receiptUrlToDelete)
-        : undefined,
+      () => deleteTaskDoc(account.accountNumber, id), undefined,
     )
   }
 
@@ -310,9 +237,9 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         account,
         login,
         logout,
-        addTransaction,
-        updateTransaction,
-        deleteTransaction,
+        addTask,
+        updateTask,
+        deleteTask,
         isHydrated,
       }}
     >

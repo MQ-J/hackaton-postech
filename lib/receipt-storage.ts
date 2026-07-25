@@ -10,7 +10,7 @@ export type UploadReceiptParams = {
   /** Firebase Auth UID — deve bater com `receipts/{uid}/...` nas Storage Rules. */
   uid: string
   accountNumber: string
-  transactionId: string
+  taskId: string
   /** Nome original (ex.: do DocumentPicker) para inferir extensão em URIs sem sufixo. */
   fileNameHint?: string | null
 }
@@ -49,18 +49,18 @@ function contentTypeForExt(ext: string, blobType: string): string {
 
 /**
  * Envia recibo/documento ao Firebase Storage e retorna a URL de download (tokenizada).
- * Path: `receipts/{uid}/{accountNumber}/{transactionId}/{filename}`
+ * Path: `receipts/{uid}/{accountNumber}/{taskId}/{filename}`
  */
 export async function uploadReceipt(
   localUri: string,
   params: UploadReceiptParams,
 ): Promise<string> {
-  const { uid, accountNumber, transactionId, fileNameHint } = params
+  const { uid, accountNumber, taskId, fileNameHint } = params
   const ext = extensionFromUri(localUri, fileNameHint)
   const filename = `receipt_${Date.now()}.${ext}`
   const storageRef = ref(
     storage,
-    `receipts/${uid}/${accountNumber}/${transactionId}/${filename}`,
+    `receipts/${uid}/${accountNumber}/${taskId}/${filename}`,
   )
 
   const response = await fetch(localUri)

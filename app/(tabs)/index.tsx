@@ -1,7 +1,7 @@
+import { TaskForm } from '@/components/TaskForm';
 import TasksList from '@/components/TasksList';
-import { TransactionForm } from '@/components/TransactionForm';
 import { useAnimate } from '@/hooks/useAnimate';
-import type { Transaction } from '@/lib/types';
+import type { Task } from '@/lib/types';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from 'react';
 import {
@@ -17,26 +17,26 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function TasksScreen() {
   const [modalVisible, setModalVisible] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [hasOpenedModal, setHasOpenedModal] = useState(false);
 
   const { opacity, translateY } = useAnimate()
 
   const openAdd = () => {
     setHasOpenedModal(true);
-    setEditingTransaction(null);
+    setEditingTask(null);
     setModalVisible(true);
   };
 
-  const openEdit = (transaction: Transaction) => {
+  const openEdit = (task: Task) => {
     setHasOpenedModal(true);
-    setEditingTransaction(transaction);
+    setEditingTask(task);
     setModalVisible(true);
   };
 
   const closeModal = () => {
     setModalVisible(false);
-    setEditingTransaction(null);
+    setEditingTask(null);
   };
 
   return (
@@ -47,7 +47,7 @@ export default function TasksScreen() {
 
       {/* FAB */}
       <Pressable style={styles.fab} onPress={openAdd}>
-        <Ionicons name="add" size={28} color="#25292e" />
+        <Ionicons name="add" size={28} color="#25292e" /> <Text>Nova lista</Text>
       </Pressable>
 
       {/* Add / Edit Modal */}
@@ -59,7 +59,7 @@ export default function TasksScreen() {
         <SafeAreaView style={styles.modalSafe}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>
-              {editingTransaction ? 'Editar Tarefa' : 'Nova Tarefa'}
+              {editingTask ? 'Editar lista' : 'Nova lista'}
             </Text>
             <Pressable onPress={closeModal} style={styles.closeButton}>
               <Ionicons name="close" size={24} color="#333" />
@@ -70,8 +70,8 @@ export default function TasksScreen() {
             keyboardShouldPersistTaps="handled"
           >
             {hasOpenedModal && (
-              <TransactionForm
-                transaction={editingTransaction ?? undefined}
+              <TaskForm
+                task={editingTask ?? undefined}
                 onSuccess={closeModal}
               />
             )}
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 28,
     right: 24,
-    width: 45,
+    width: 105,
     height: 45,
     borderRadius: 28,
     backgroundColor: '#ffd33d',

@@ -1,22 +1,21 @@
-export type TransactionType = 'deposito' | 'transferencia' | 'pagamento' | 'saque'
-
-export interface Transaction {
+export interface Item {
   id: string
-  type: TransactionType
-  amount: number
-  date: string
+  description: string
+  checked: boolean
+}
+export interface Task {
+  id: string
+  title?: string
   description?: string
-  receiptUrl?: string
+  items: Item[]
 }
 
 export interface Account {
   /** Firebase Auth UID — preenchido após login; usado para `users/{uid}` no Firestore. */
   uid?: string
-  balance: number
-  accountNumber: string
   userName: string
-  email: string
-  transactions: Transaction[]
+  phone: string
+  tasks: Task[]
 }
 
 /** Documento `users/{uid}` no Firestore (mesma forma que `Account` no app). */

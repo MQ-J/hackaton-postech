@@ -36,12 +36,12 @@ const firebaseConfig = {
 | Arquivo | Função |
 | :--- | :--- |
 | **`lib/firebase.ts`** | Exporta **`db`** (`getFirestore(app)`) e **`storage`** (`getStorage(app)`), usando o mesmo `app` importado de `@/firebase/config` para não haver dois `initializeApp`. |
-| **`lib/firestore.ts`** | CRUD na subcoleção **`accounts/{accountNumber}/transactions`**, leitura paginada opcional (`fetchTransactions`), carga completa (`fetchAllTransactions`), espelho financeiro em **`users/{uid}`** (`updateUserProfileFinancials`), e `deleteField` ao remover `receiptUrl`. |
+| **`lib/firestore.ts`** | CRUD na subcoleção **`accounts/{accountNumber}/tasks`**, leitura paginada opcional (`fetchTasks`), carga completa (`fetchAllTasks`), espelho financeiro em **`users/{uid}`** (`updateUserProfileTasks`), e `deleteField` ao remover `receiptUrl`. |
 | **`lib/user-account-from-firestore.ts`** | Lê o documento **`users/{uid}`** e monta o tipo **`Account`** usado no app. |
-| **`lib/receipt-storage.ts`** | Upload de recibos (`uploadBytes` + `getDownloadURL`) no path **`receipts/{uid}/{accountNumber}/{transactionId}/…`** e exclusão por URL de download (`deleteReceiptFromFirebaseIfPresent`). |
+| **`lib/receipt-storage.ts`** | Upload de recibos (`uploadBytes` + `getDownloadURL`) no path **`receipts/{uid}/{accountNumber}/{taskId}/…`** e exclusão por URL de download (`deleteReceiptFromFirebaseIfPresent`). |
 | **`lib/firebase-auth-messages.ts`** | Tradução / mapeamento de códigos de erro do Firebase Auth para mensagens amigáveis na UI (quando utilizado). |
 
-Outros arquivos em `lib/` (`format.ts`, `transaction-schema.ts`, `types.ts`, etc.) não são específicos do Firebase, mas definem tipos e validações usados nas telas integradas.
+Outros arquivos em `lib/` (`format.ts`, `task-schema.ts`, `types.ts`, etc.) não são específicos do Firebase, mas definem tipos e validações usados nas telas integradas.
 
 **Contextos:**
 
@@ -86,10 +86,10 @@ Ajuste limites e tipos conforme a necessidade do desafio ou produção.
 
 | Caminho | Conteúdo |
 | :--- | :--- |
-| **`users/{uid}`** | Perfil: `userName`, `email`, `accountNumber`, `balance`, `transactions` (espelho opcional das tarefas). |
-| **`accounts/{accountNumber}/transactions/{transactionId}`** | Documento da tarefa: `type`, `amount`, `date`, `description?`, `receiptUrl?`. |
+| **`users/{uid}`** | Perfil: `userName`, `email`, `accountNumber`, `balance`, `tasks` (espelho opcional das tarefas). |
+| **`accounts/{accountNumber}/tasks/{taskId}`** | Documento da tarefa: `type`, `amount`, `date`, `description?`, `receiptUrl?`. |
 
-O **`accountNumber`** é gerado no cadastro (`AuthContext`) e precisa ser **o mesmo** usado na subcoleção `accounts/.../transactions`.
+O **`accountNumber`** é gerado no cadastro (`AuthContext`) e precisa ser **o mesmo** usado na subcoleção `accounts/.../tasks`.
 
 4. **Regras de segurança (exemplo alinhado ao app)**  
    Ajuste para o seu ambiente. Exemplo que amarra a subcoleção ao perfil do usuário:
@@ -103,7 +103,7 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    match /accounts/{accountId}/transactions/{txId} {
+    match /accounts/{accountId}/tasks/{txId} {
       allow read, write: if request.auth != null
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.accountNumber == accountId;
     }
@@ -128,7 +128,7 @@ Se o upload na **web** falhar por CORS, configure CORS no bucket conforme a [doc
 ## 5. Modelo mental do fluxo
 
 1. **Cadastro:** Auth cria usuário → app grava **`users/{uid}`** com `accountNumber`.
-2. **Login:** Auth autentica → app lê **`users/{uid}`** e carrega **`accounts/{accountNumber}/transactions`** (ordenação por `date`).
+2. **Login:** Auth autentica → app lê **`users/{uid}`** e carrega **`accounts/{accountNumber}/tasks`** (ordenação por `date`).
 3. **Transações:** create/update/delete atualizam a subcoleção e o espelho em **`users/{uid}`** (saldo e lista resumida).
 4. **Recibos:** upload para **`receipts/{uid}/...`**; URL salva em `receiptUrl` na tarefa; exclusão remove o arquivo no Storage quando o recibo é removido ou a tarefa é apagada.
 

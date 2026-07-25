@@ -3,7 +3,6 @@ import { LoginForm } from '@/components/LoginForm'
 import { PrimaryButton } from '@/components/PrimaryButton'
 import { RegisterForm } from '@/components/RegisterForm'
 import {
-  FOOTER_HEIGHT,
   MAX_CONTENT_WIDTH,
 } from '@/constants/layout'
 import { useTabletLayout } from '@/hooks/useTabletLayout'
@@ -69,25 +68,23 @@ export default function LoginScreen() {
           isTablet && styles.headerTablet,
         ]}
       >
-        <View style={styles.logoContainer}>
+        <View
+          style={styles.logoContainer}
+          accessibilityRole="header"
+          accessibilityLabel="Logo SeniorEase"
+        >
           <Ionicons
-            name="business-outline"
+            name="accessibility-outline"
             size={isTablet ? 28 : 24}
             color={theme.defaultHome}
           />
-          <Image
-            source={require('@/assets/images/logo-destaque.png')}
-            style={[
-              styles.logoImage,
-              { height: isTablet ? 50 : 35, width: isTablet ? 215 : 160 },
-            ]}
-            resizeMode="contain"
-            accessibilityLabel="Logo Lumen Financial"
-          />
+          <Text style={[styles.logoText, isTablet && styles.logoTextTablet]}>
+            SeniorEase
+          </Text>
         </View>
         <View style={styles.headerButtons}>
           <PrimaryButton
-            label="Abra sua conta"
+            label="Criar conta"
             iconName="person-add-outline"
             onPress={() => {
               setHasOpenedRegister(true)
@@ -116,8 +113,8 @@ export default function LoginScreen() {
           contentContainerStyle={[
             styles.scrollContent,
             {
+              flexGrow: 1,
               paddingHorizontal: paddingH,
-              paddingBottom: FOOTER_HEIGHT + insets.bottom + (isTablet ? 20 : 16),
               alignItems: contentCentered ? 'center' : 'stretch',
             },
           ]}
@@ -125,6 +122,7 @@ export default function LoginScreen() {
         >
           <View
             style={[
+              styles.mainContent,
               contentCentered && styles.contentCenterWrapper,
               contentCentered && { maxWidth: MAX_CONTENT_WIDTH },
             ]}
@@ -156,9 +154,9 @@ export default function LoginScreen() {
                   },
                 ]}
               >
-                Experimente mais liberdade no controle da sua vida financeira.
+                Organize suas atividades do dia a dia com uma interface simples e acessível.
                 {'\n'}
-                Crie sua conta com a gente!
+                Feito para a FIAP Inclusive — autonomia e inclusão digital.
               </Text>
               <Image
                 source={require('@/assets/images/pessoas.png')}
@@ -176,104 +174,98 @@ export default function LoginScreen() {
                 { fontSize: isTablet ? 20 : 18, marginBottom: isTablet ? 20 : 16 },
               ]}
             >
-              Vantagens do nosso banco
+              Por que usar o SeniorEase
             </Text>
 
             <View style={styles.cardsGrid}>
               <InfosCard
-                title="Conta e cartão gratuitos"
-                icon="gift-outline"
-                description="Conta digital sem custo fixo e sem tarifa de manutenção."
+                title="Fonte ajustável"
+                icon="text-outline"
+                description="Aumente o tamanho do texto para ler com mais conforto."
                 style={{ width: cardWidth }}
               />
               <InfosCard
-                title="Saques sem custo"
-                icon="cash-outline"
-                description="Quatro saques gratuitos por mês em qualquer Banco 24h."
+                title="Alto contraste"
+                icon="contrast-outline"
+                description="Cores pensadas para facilitar a leitura na tela."
                 style={{ width: cardWidth }}
               />
               <InfosCard
-                title="Programa de pontos"
-                icon="star-outline"
-                description="Acumule pontos com compras no crédito sem pagar mensalidade."
+                title="Tarefas simples"
+                icon="checkmark-done-outline"
+                description="Lista clara do que fazer, sem menus complicados."
                 style={{ width: cardWidth }}
               />
               <InfosCard
-                title="Seguro Dispositivos"
-                icon="phone-portrait-outline"
-                description="Seus dispositivos protegidos por uma mensalidade simbólica."
+                title="Confirmação segura"
+                icon="shield-checkmark-outline"
+                description="Ações importantes pedem confirmação antes de executar."
                 style={{ width: cardWidth }}
               />
             </View>
+          </View>
 
+          <View
+            style={[
+              styles.footer,
+              {
+                marginHorizontal: -paddingH,
+                paddingHorizontal: paddingH,
+                paddingTop: isTablet ? 24 : 20,
+                paddingBottom: insets.bottom + (isTablet ? 20 : 16),
+                alignItems: 'center',
+              },
+            ]}
+          >
+            <View style={styles.footerInner}>
+              <View style={styles.footerColumnLeft}>
+                <Text
+                  style={[
+                    styles.footerTitle,
+                    isTablet && styles.footerTitleTablet,
+                  ]}
+                >
+                  Recursos
+                </Text>
+                <Text
+                  style={[styles.footerText, isTablet && styles.footerTextTablet]}
+                >
+                  Lista de tarefas
+                </Text>
+                <Text
+                  style={[styles.footerText, isTablet && styles.footerTextTablet]}
+                >
+                  Perfil e preferências
+                </Text>
+                <Text
+                  style={[styles.footerText, isTablet && styles.footerTextTablet]}
+                >
+                  Ajustes de acessibilidade
+                </Text>
+              </View>
+              <View style={styles.footerColumnRight}>
+                <Text
+                  style={[
+                    styles.footerTitle,
+                    isTablet && styles.footerTitleTablet,
+                  ]}
+                >
+                  FIAP Inclusive
+                </Text>
+                <Text
+                  style={[styles.footerText, isTablet && styles.footerTextTablet]}
+                >
+                  Plataforma de inclusão digital para ambientes acadêmicos.
+                </Text>
+                <Text
+                  style={[styles.footerText, isTablet && styles.footerTextTablet]}
+                >
+                  Hackathon POSTECH — SeniorEase
+                </Text>
+              </View>
+            </View>
           </View>
         </ScrollView>
-      </View>
-
-      <View
-        style={[
-          styles.footer,
-          styles.footerFixed,
-          {
-            paddingTop: isTablet ? 20 : 16,
-            paddingBottom: (isTablet ? 20 : 16) + insets.bottom,
-            paddingHorizontal: paddingH,
-            alignItems: 'center',
-          },
-        ]}
-      >
-        <View style={styles.footerInner}>
-          <View style={styles.footerColumnLeft}>
-            <Text
-              style={[
-                styles.footerTitle,
-                isTablet && styles.footerTitleTablet,
-              ]}
-            >
-              Serviços
-            </Text>
-            <Text
-              style={[styles.footerText, isTablet && styles.footerTextTablet]}
-            >
-              Conta Corrente
-            </Text>
-            <Text
-              style={[styles.footerText, isTablet && styles.footerTextTablet]}
-            >
-              Conta PJ
-            </Text>
-            <Text
-              style={[styles.footerText, isTablet && styles.footerTextTablet]}
-            >
-              Cartão de Crédito
-            </Text>
-          </View>
-          <View style={styles.footerColumnRight}>
-            <Text
-              style={[
-                styles.footerTitle,
-                isTablet && styles.footerTitleTablet,
-              ]}
-            >
-              Contatos
-            </Text>
-            <Text
-              style={[styles.footerText, isTablet && styles.footerTextTablet]}
-            >
-              0800 486 345 02
-            </Text>
-            <Text
-              style={[styles.footerText, isTablet && styles.footerTextTablet]}
-            >
-              suporte@lumenfinancial.com.br
-            </Text>
-            <Text
-              style={[styles.footerText, isTablet && styles.footerTextTablet]}
-            >
-              ouvidoria@lumenfinancial.com.br
-            </Text>
-          </View>
-        </View>
       </View>
 
       {isMounted && (
@@ -295,7 +287,7 @@ export default function LoginScreen() {
                   modalMaxWidth != null && { maxWidth: modalMaxWidth },
                 ]}
               >
-                <Text style={styles.modalTitle}>Acessar sua Conta</Text>
+                <Text style={styles.modalTitle}>Entrar no SeniorEase</Text>
                 {hasOpenedLogin && (
                   <LoginForm onSuccess={() => setIsLoginModalOpen(false)} />
                 )}
@@ -323,9 +315,9 @@ export default function LoginScreen() {
                   modalMaxWidth != null && { maxWidth: modalMaxWidth },
                 ]}
               >
-                <Text style={styles.modalTitle}>Abrir nova Conta</Text>
+                <Text style={styles.modalTitle}>Criar conta</Text>
                 <Text style={styles.modalDescription}>
-                  Preencha o formulário abaixo para se cadastrar.
+                  Preencha seus dados para começar a usar o app.
                 </Text>
                 {hasOpenedRegister && (
                   <RegisterForm
@@ -370,7 +362,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
+    flexGrow: 1,
     paddingTop: '9%',
+  },
+  mainContent: {
+    flexGrow: 1,
+    width: '100%',
   },
   contentCenterWrapper: {
     alignSelf: 'center',
@@ -380,9 +377,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-  },
-  logoImage: {
-    backgroundColor: 'transparent',
   },
   logoText: {
     fontSize: 20,
@@ -430,18 +424,14 @@ const styles = StyleSheet.create({
   },
   footer: {
     backgroundColor: '#000',
-  },
-  footerFixed: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    alignSelf: 'stretch',
   },
   footerInner: {
     flexDirection: 'row',
     justifyContent: 'center',
     width: '100%',
     maxWidth: MAX_CONTENT_WIDTH,
+    gap: 16,
   },
   footerColumnLeft: {
     flex: 1,

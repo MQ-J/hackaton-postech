@@ -1,24 +1,12 @@
-import React, { useEffect, useRef } from 'react'
-import { Animated, Text, StyleSheet } from 'react-native'
-import type { Transaction } from '@/lib/types'
-import { formatCurrency, formatDate, formatMonth } from '@/lib/format'
+import type { Task } from '@/lib/types'
+import { useEffect, useRef } from 'react'
+import { Animated, StyleSheet, Text } from 'react-native'
 
-const TYPE_LABELS: Record<Transaction['type'], string> = {
-  deposito: 'Depósito',
-  transferencia: 'Transferência',
-  pagamento: 'Pagamento',
-  saque: 'Saque',
+interface RecentTaskRowProps {
+  task: Task
 }
 
-interface RecentTransactionRowProps {
-  transaction: Transaction
-}
-
-export function RecentTransactionRow({ transaction }: RecentTransactionRowProps) {
-  const label = TYPE_LABELS[transaction.type] ?? transaction.description ?? transaction.type
-  const isPositive = transaction.amount >= 0
-  const displayValue = formatCurrency(Math.abs(transaction.amount))
-  const valuePrefix = transaction.amount >= 0 ? '' : '-'
+export function RecentTaskRow({ task }: RecentTaskRowProps) {
 
   const opacity = useRef(new Animated.Value(0)).current
   const translateY = useRef(new Animated.Value(8)).current
@@ -41,13 +29,9 @@ export function RecentTransactionRow({ transaction }: RecentTransactionRowProps)
   return (
     <Animated.View style={[styles.row, { opacity, transform: [{ translateY }] }]}>
       <Animated.View style={styles.left}>
-        <Text style={styles.month}>{formatMonth(transaction.date)}</Text>
-        <Text style={styles.label}>{label}</Text>
-        <Text style={[styles.amount, isPositive ? styles.amountPositive : styles.amountNegative]}>
-          {valuePrefix}{displayValue}
-        </Text>
+        <Text style={styles.month}>{task.title}</Text>
+        <Text style={styles.label}>{task.description}</Text>
       </Animated.View>
-      <Text style={styles.date}>{formatDate(transaction.date)}</Text>
     </Animated.View>
   )
 }

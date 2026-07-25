@@ -1,9 +1,8 @@
 import { db } from '@/lib/firebase'
-import type { Transaction, TransactionType } from '@/lib/types'
+import type { Task } from '@/lib/types'
 import {
   collection,
   deleteDoc,
-  deleteField,
   doc,
   getDocs,
   limit,
@@ -12,72 +11,51 @@ import {
   setDoc,
   startAfter,
   updateDoc,
-  where,
   type DocumentData,
-  type QueryDocumentSnapshot,
+  type QueryDocumentSnapshot
 } from 'firebase/firestore'
 
-function transactionForUserDoc(t: Transaction): Record<string, unknown> {
+function taskForUserDoc(t: Task): Record<string, unknown> {
   const o: Record<string, unknown> = {
     id: t.id,
-    type: t.type,
-    amount: t.amount,
-    date: t.date,
+    items: t.items,
   }
+  if (t.title !== undefined) o.receiptUrl = t.title
   if (t.description !== undefined) o.description = t.description
-  if (t.receiptUrl !== undefined) o.receiptUrl = t.receiptUrl
   return o
 }
 
-/** Atualiza saldo e espelho de tarefas em `users/{uid}` (além da subcoleção `accounts/.../transactions`). */
-export async function updateUserProfileFinancials(
+/** Atualiza saldo e espelho de tarefas em `users/{uid}` (além da subcoleção `accounts/.../tasks`). */
+export async function updateUserProfileTasks(
   uid: string,
-  balance: number,
-  transactions: Transaction[],
+  tasks: Task[],
 ): Promise<void> {
   const ref = doc(db, 'users', uid)
   await updateDoc(ref, {
-    balance,
-    transactions: transactions.map(transactionForUserDoc),
+    tasks: tasks.map(taskForUserDoc),
   })
 }
 
 const PAGE_SIZE = 10
 
-export interface TransactionFilters {
-  type?: TransactionType | 'todos'
-  dateFrom?: string // ISO date string YYYY-MM-DD
-  dateTo?: string   // ISO date string YYYY-MM-DD
-}
-
-export interface FetchTransactionsResult {
-  transactions: Transaction[]
+export interface FetchTasksResult {
+  tasks: Task[]
   lastDoc: QueryDocumentSnapshot<DocumentData> | null
   hasMore: boolean
 }
 
-function transactionsCol(accountNumber: string) {
-  return collection(db, 'accounts', accountNumber, 'transactions')
+function tasksCol(accountNumber: string) {
+  return collection(db, 'accounts', accountNumber, 'tasks')
 }
 
-export async function fetchTransactions(
+export async function fetchTasks(
   accountNumber: string,
-  filters: TransactionFilters = {},
   cursorDoc: QueryDocumentSnapshot<DocumentData> | null = null,
-): Promise<FetchTransactionsResult> {
-  const col = transactionsCol(accountNumber)
+): Promise<FetchTasksResult> {
+  const col = tasksCol(accountNumber)
 
   const constraints: Parameters<typeof query>[1][] = [orderBy('date', 'desc'), limit(PAGE_SIZE + 1)]
 
-  if (filters.type && filters.type !== 'todos') {
-    constraints.unshift(where('type', '==', filters.type))
-  }
-  if (filters.dateFrom) {
-    constraints.unshift(where('date', '>=', filters.dateFrom))
-  }
-  if (filters.dateTo) {
-    constraints.unshift(where('date', '<=', filters.dateTo))
-  }
   if (cursorDoc) {
     constraints.push(startAfter(cursorDoc))
   }
@@ -90,61 +68,51 @@ export async function fetchTransactions(
   const pageDocs = hasMore ? docs.slice(0, PAGE_SIZE) : docs
   const lastDoc = pageDocs.length > 0 ? pageDocs[pageDocs.length - 1] : null
 
-  const transactions: Transaction[] = pageDocs.map((d) => ({
+  const tasks: Task[] = pageDocs.map((d) => ({
     id: d.id,
-    ...(d.data() as Omit<Transaction, 'id'>),
+    ...(d.data() as Omit<Task, 'id'>),
   }))
 
-  return { transactions, lastDoc, hasMore }
+  return { tasks, lastDoc, hasMore }
 }
 
-export async function fetchAllTransactions(accountNumber: string): Promise<Transaction[]> {
-  const col = transactionsCol(accountNumber)
+export async function fetchAllTasks(accountNumber: string): Promise<Task[]> {
+  const col = tasksCol(accountNumber)
   const q = query(col, orderBy('date', 'desc'))
   const snapshot = await getDocs(q)
   return snapshot.docs.map((d) => ({
     id: d.id,
-    ...(d.data() as Omit<Transaction, 'id'>),
+    ...(d.data() as Omit<Task, 'id'>),
   }))
 }
 
-export async function addTransactionDoc(
+export async function addTaskDoc(
   accountNumber: string,
-  transaction: Transaction,
+  task: Task,
 ): Promise<void> {
-  const { id, ...data } = transaction
-  await setDoc(doc(transactionsCol(accountNumber), id), data)
+  const { id, ...data } = task
+  await setDoc(doc(tasksCol(accountNumber), id), data)
 }
 
 /** `receiptUrl: null` remove o campo no documento (e o recibo deixa de aparecer no app). */
-export type TransactionDocUpdate = Omit<
-  Partial<Omit<Transaction, 'id'>>,
-  'receiptUrl'
-> & {
-  receiptUrl?: string | null
-}
+export type TaskDocUpdate = Partial<Omit<Task, 'id'>>
 
-export async function updateTransactionDoc(
+export async function updateTaskDoc(
   accountNumber: string,
   id: string,
-  data: TransactionDocUpdate,
+  data: TaskDocUpdate,
 ): Promise<void> {
-  const { receiptUrl, ...rest } = data
   const payload: Record<string, unknown> = {}
-  for (const [key, value] of Object.entries(rest)) {
+  for (const [key, value] of Object.entries(data)) {
     if (value !== undefined) payload[key] = value
   }
-  if (receiptUrl === null) {
-    payload.receiptUrl = deleteField()
-  } else if (receiptUrl !== undefined) {
-    payload.receiptUrl = receiptUrl
-  }
-  await updateDoc(doc(transactionsCol(accountNumber), id), payload)
+
+  await updateDoc(doc(tasksCol(accountNumber), id), payload)
 }
 
-export async function deleteTransactionDoc(
+export async function deleteTaskDoc(
   accountNumber: string,
   id: string,
 ): Promise<void> {
-  await deleteDoc(doc(transactionsCol(accountNumber), id))
+  await deleteDoc(doc(tasksCol(accountNumber), id))
 }
