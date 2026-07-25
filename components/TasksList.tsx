@@ -1,6 +1,5 @@
 import { useAccount } from '@/contexts/AccountContext'
-import { formatCurrency } from '@/lib/format'
-import type { Transaction, TransactionType } from '@/lib/types'
+import type { Task } from '@/lib/types'
 import { theme } from '@/theme/colors'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -15,41 +14,22 @@ import {
   View,
 } from 'react-native'
 
-
-const TYPE_CHIPS: { value: TransactionType | 'todos'; label: string }[] = [
-  { value: 'todos', label: 'Todos' },
-  { value: 'deposito', label: 'Depósito' },
-  { value: 'transferencia', label: 'Transferência' },
-  { value: 'pagamento', label: 'Pagamento' },
-  { value: 'saque', label: 'Saque' },
-]
-
-const TYPE_LABELS: Record<TransactionType, string> = {
-  deposito: 'Depósito',
-  transferencia: 'Transferência',
-  pagamento: 'Pagamento',
-  saque: 'Saque',
-}
-
 /** Itens por página na lista (≤ este número: sem barra de paginação). */
 const TRANSACTIONS_PAGE_SIZE = 10
 
 interface TasksListProps {
-  onEdit: (transaction: Transaction) => void
+  onEdit: (task: Task) => void
 }
 
 export default function TasksList({ onEdit }: TasksListProps) {
-  const { account, deleteTransaction } = useAccount()
+  const { account, deleteTask } = useAccount()
 
-  const [selectedType, setSelectedType] = useState<TransactionType | 'todos'>('todos')
-  const [dateFrom, setDateFrom] = useState('')
-  const [dateTo, setDateTo] = useState('')
   const [search, setSearch] = useState('')
-  const [deleteTarget, setDeleteTarget] = useState<Transaction | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Task | null>(null)
   const [deleteModalVisible, setDeleteModalVisible] = useState(false)
   const deleteModalClearWebTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
-  const listRef = useRef<FlatList<Transaction>>(null)
+  const listRef = useRef<FlatList<Task>>(null)
 
   useEffect(() => {
     return () => {
@@ -61,52 +41,33 @@ export default function TasksList({ onEdit }: TasksListProps) {
 
   const localFiltered = useMemo(() => {
     if (!account) return []
-    let list = account.transactions
-    if (selectedType !== 'todos') {
-      list = list.filter((t) => t.type === selectedType)
-    }
+    let list = account.tasks
+
     if (search.trim()) {
       const q = search.trim().toLowerCase()
-      list = list.filter((t) =>
-        (t.description ?? TYPE_LABELS[t.type]).toLowerCase().includes(q),
+      list = list.filter((t) => t.description &&
+        (t.description).toLowerCase().includes(q),
       )
     }
-    if (dateFrom) {
-      const parts = dateFrom.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
-      if (parts) {
-        const iso = `${parts[3]}-${parts[2]}-${parts[1]}`
-        list = list.filter((t) => t.date >= iso)
-      }
-    }
-    if (dateTo) {
-      const parts = dateTo.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
-      if (parts) {
-        const iso = `${parts[3]}-${parts[2]}-${parts[1]}`
-        list = list.filter((t) => t.date <= iso)
-      }
-    }
-    return list
-  }, [account, selectedType, search, dateFrom, dateTo])
 
-  const displayedTransactions = useMemo(() => {
-    return [...localFiltered].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
-  }, [localFiltered])
+    return list
+  }, [account, search])
 
   const totalPages = Math.max(
     1,
-    Math.ceil(displayedTransactions.length / TRANSACTIONS_PAGE_SIZE),
+    Math.ceil(localFiltered.length / TRANSACTIONS_PAGE_SIZE),
   )
-  const showPagination = displayedTransactions.length > TRANSACTIONS_PAGE_SIZE
+  const showPagination = localFiltered.length > TRANSACTIONS_PAGE_SIZE
 
-  const paginatedTransactions = useMemo(() => {
+  const paginatedTasks = useMemo(() => {
     if (!showPagination) {
-      return displayedTransactions
+      return localFiltered
     }
     const start = (currentPage - 1) * TRANSACTIONS_PAGE_SIZE
-    return displayedTransactions.slice(start, start + TRANSACTIONS_PAGE_SIZE)
-  }, [displayedTransactions, currentPage, showPagination])
+    return localFiltered.slice(start, start + TRANSACTIONS_PAGE_SIZE)
+  }, [localFiltered, currentPage, showPagination])
 
-  const filterKey = `${selectedType}|${dateFrom}|${dateTo}|${search}`
+  const filterKey = `${search}`
   useEffect(() => {
     setCurrentPage(1)
   }, [filterKey])
@@ -152,45 +113,34 @@ export default function TasksList({ onEdit }: TasksListProps) {
     }
   }
 
-  const handleDeletePress = (transaction: Transaction) => {
+  const handleDeletePress = (task: Task) => {
     if (Platform.OS === 'web' && deleteModalClearWebTimerRef.current) {
       clearTimeout(deleteModalClearWebTimerRef.current)
       deleteModalClearWebTimerRef.current = null
     }
-    setDeleteTarget(transaction)
+    setDeleteTarget(task)
     setDeleteModalVisible(true)
   }
 
   const handleConfirmDelete = () => {
     if (deleteTarget) {
-      deleteTransaction(deleteTarget.id)
+      deleteTask(deleteTarget.id)
     }
     closeDeleteModal()
   }
 
-  const renderItem = ({ item }: { item: Transaction }) => (
+  const renderItem = ({ item }: { item: Task }) => (
     <View style={styles.item}>
       <View style={styles.itemLeft}>
-        <View style={styles.typeBadge}>
-          <Text style={styles.typeBadgeText}>{TYPE_LABELS[item.type]}</Text>
-        </View>
+        <Text style={styles.title} numberOfLines={1}>
+          {item.title}
+        </Text>
         <Text style={styles.description} numberOfLines={1}>
-          {item.description ?? TYPE_LABELS[item.type]}
+          {item.description}
         </Text>
-        <Text style={styles.date}>
-          {new Date(item.date + 'T12:00:00').toLocaleDateString('pt-BR')}
-        </Text>
+
       </View>
       <View style={styles.itemRight}>
-        <Text
-          style={[
-            styles.amount,
-            item.amount >= 0 ? styles.income : styles.expense,
-          ]}
-        >
-          {item.amount >= 0 ? '+' : ''}
-          {formatCurrency(item.amount)}
-        </Text>
         <View style={styles.actionRow}>
           <Pressable
             style={[styles.actionButton, styles.editButton]}
@@ -228,22 +178,12 @@ export default function TasksList({ onEdit }: TasksListProps) {
             {deleteTarget ? (
               <View style={styles.deleteModalSummary}>
                 <Text style={styles.deleteModalSummaryLabel}>
-                  {TYPE_LABELS[deleteTarget.type]}
+                  {deleteTarget.title || ''}
                   {deleteTarget.description
                     ? ` · ${deleteTarget.description}`
                     : ''}
                 </Text>
-                <Text
-                  style={[
-                    styles.deleteModalSummaryAmount,
-                    deleteTarget.amount >= 0
-                      ? styles.deleteModalAmountPositive
-                      : styles.deleteModalAmountNegative,
-                  ]}
-                >
-                  {deleteTarget.amount >= 0 ? '+' : ''}
-                  {formatCurrency(deleteTarget.amount)}
-                </Text>
+
               </View>
             ) : null}
             <View style={styles.deleteModalActions}>
@@ -288,8 +228,8 @@ export default function TasksList({ onEdit }: TasksListProps) {
 
       <View style={styles.resultRow}>
         <Text style={styles.resultCount}>
-          {displayedTransactions.length}{' '}
-          {displayedTransactions.length === 1 ? 'tarefa' : 'tarefas'}
+          {localFiltered.length}{' '}
+          {localFiltered.length === 1 ? 'tarefa' : 'tarefas'}
         </Text>
       </View>
 
@@ -299,7 +239,7 @@ export default function TasksList({ onEdit }: TasksListProps) {
           style={styles.list}
           contentContainerStyle={styles.listContent}
           keyboardShouldPersistTaps="handled"
-          data={paginatedTransactions}
+          data={paginatedTasks}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           ListEmptyComponent={

@@ -1,156 +1,61 @@
 import { PrimaryButton } from '@/components/PrimaryButton'
 import { useAccount } from '@/contexts/AccountContext'
 import { auth } from '@/firebase/config'
-import type { TransactionDocUpdate } from '@/lib/firestore'
-import { formatCurrencyInput, parseCurrency } from '@/lib/format'
-import { uploadReceipt } from '@/lib/receipt-storage'
 import {
-  TRANSACTION_TYPES,
-  type TransactionFormValues,
-  formDateToIso,
-  isoToFormDate,
-  transactionSchema,
-} from '@/lib/transaction-schema'
-import type { Transaction } from '@/lib/types'
+  type TaskFormValues,
+  taskSchema
+} from '@/lib/task-schema'
+import type { Task } from '@/lib/types'
 import { theme } from '@/theme/colors'
-import Ionicons from '@expo/vector-icons/Ionicons'
 import { zodResolver } from '@hookform/resolvers/zod'
-import * as DocumentPicker from 'expo-document-picker'
-import * as ImagePicker from 'expo-image-picker'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  Modal,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  View,
 } from 'react-native'
 import Toast from 'react-native-toast-message'
 
-interface TransactionFormProps {
+interface TaskFormProps {
   /** When provided the form operates in edit mode */
-  transaction?: Transaction
+  task?: Task
   onSuccess?: () => void
 }
 
-export function TransactionForm({ transaction, onSuccess }: TransactionFormProps) {
-  const { account, addTransaction, updateTransaction } = useAccount()
-  const [typeModalVisible, setTypeModalVisible] = useState(false)
-  const [uploading, setUploading] = useState(false)
-  /** Pré-visualização: imagem ou PDF (galeria/câmera = imagem). */
-  const [receiptAttachKind, setReceiptAttachKind] = useState<'image' | 'pdf'>('image')
-  const [receiptPickedLabel, setReceiptPickedLabel] = useState<string | null>(null)
-  const isEditMode = Boolean(transaction)
+export function TaskForm({ task, onSuccess }: TaskFormProps) {
+  const { account, addTask, updateTask } = useAccount()
+  const isEditMode = Boolean(task)
 
   const {
     control,
     handleSubmit,
     reset,
-    setValue,
-    watch,
     formState: { errors, isSubmitting },
-  } = useForm<TransactionFormValues>({
-    resolver: zodResolver(transactionSchema),
+  } = useForm<TaskFormValues>({
+    resolver: zodResolver(taskSchema),
     defaultValues: {
-      type: transaction?.type ?? 'deposito',
-      amount: transaction
-        ? Math.abs(transaction.amount).toFixed(2).replace('.', ',')
-        : '',
-      description: transaction?.description ?? '',
-      date: transaction
-        ? isoToFormDate(transaction.date)
-        : isoToFormDate(new Date().toISOString().split('T')[0]),
-      receiptUri: transaction?.receiptUrl ?? '',
+      title: task?.title ?? '',
+      description: task?.description ?? '',
     },
   })
 
   useEffect(() => {
-    if (transaction) {
-      const url = transaction.receiptUrl ?? ''
-      const isPdf =
-        /\.pdf(\?|#|$)/i.test(url) ||
-        url.toLowerCase().includes('application%2Fpdf')
-      setReceiptAttachKind(isPdf ? 'pdf' : 'image')
-      setReceiptPickedLabel(isPdf ? 'Recibo em PDF' : null)
+    if (task) {
       reset({
-        type: transaction.type,
-        amount: Math.abs(transaction.amount).toFixed(2).replace('.', ','),
-        description: transaction.description ?? '',
-        date: isoToFormDate(transaction.date),
-        receiptUri: url,
+        title: task.title ?? '',
+        description: task.description ?? '',
       })
     } else {
-      setReceiptAttachKind('image')
-      setReceiptPickedLabel(null)
       reset({
-        type: 'deposito',
-        amount: '',
+        title: '',
         description: '',
-        date: isoToFormDate(new Date().toISOString().split('T')[0]),
-        receiptUri: '',
       })
     }
-  }, [transaction, reset])
+  }, [task, reset])
 
-  const receiptUri = watch('receiptUri')
-
-  const handlePickReceipt = useCallback(async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
-    if (status !== 'granted') {
-      Alert.alert('Permissão necessária', 'Permita o acesso à galeria para anexar recibos.')
-      return
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.8,
-    })
-    if (!result.canceled && result.assets.length > 0) {
-      setReceiptAttachKind('image')
-      setReceiptPickedLabel(null)
-      setValue('receiptUri', result.assets[0].uri, { shouldValidate: true })
-    }
-  }, [setValue])
-
-  const handleTakePhoto = useCallback(async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync()
-    if (status !== 'granted') {
-      Alert.alert('Permissão necessária', 'Permita o acesso à câmera para tirar fotos do recibo.')
-      return
-    }
-    const result = await ImagePicker.launchCameraAsync({ quality: 0.8 })
-    if (!result.canceled && result.assets.length > 0) {
-      setReceiptAttachKind('image')
-      setReceiptPickedLabel(null)
-      setValue('receiptUri', result.assets[0].uri, { shouldValidate: true })
-    }
-  }, [setValue])
-
-  const handlePickDocument = useCallback(async () => {
-    const result = await DocumentPicker.getDocumentAsync({
-      type: ['image/*', 'application/pdf'],
-      copyToCacheDirectory: true,
-    })
-    if (result.canceled || !result.assets?.length) return
-    const file = result.assets[0]
-    const isPdf =
-      file.mimeType === 'application/pdf' ||
-      file.name?.toLowerCase().endsWith('.pdf')
-    setReceiptAttachKind(isPdf ? 'pdf' : 'image')
-    setReceiptPickedLabel(file.name ?? (isPdf ? 'Documento PDF' : 'Imagem'))
-    setValue('receiptUri', file.uri, { shouldValidate: true })
-  }, [setValue])
-
-  const onSubmit = async (values: TransactionFormValues) => {
-    const isoDate = formDateToIso(values.date)
-    const numAmount = parseCurrency(values.amount)
-    const finalAmount = values.type === 'deposito' ? numAmount : -Math.abs(numAmount)
-
+  const onSubmit = async (values: TaskFormValues) => {
     if (!account) {
       Toast.show({
         type: 'error',
@@ -170,59 +75,23 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
       return
     }
 
-    const presetId = isEditMode && transaction ? transaction.id : Date.now().toString()
-    let nextReceiptUrl: string | null | undefined = undefined
-
-    if (values.receiptUri && !values.receiptUri.startsWith('https://')) {
-      try {
-        setUploading(true)
-        nextReceiptUrl = await uploadReceipt(values.receiptUri, {
-          uid,
-          accountNumber: account.accountNumber,
-          transactionId: presetId,
-          fileNameHint: receiptPickedLabel,
-        })
-      } catch (e) {
-        const message =
-          e instanceof Error ? e.message : 'Verifique conexão, login e regras do Storage.'
-        Toast.show({
-          type: 'error',
-          text1: 'Falha no upload do recibo',
-          text2: message,
-        })
-        return
-      } finally {
-        setUploading(false)
-      }
-    } else if (values.receiptUri) {
-      nextReceiptUrl = values.receiptUri
-    } else if (isEditMode && transaction?.receiptUrl) {
-      /** Usuário removeu o recibo no formulário — limpa Firestore e Storage após salvar. */
-      nextReceiptUrl = null
-    }
+    const presetId = isEditMode && task ? task.id : Date.now().toString()
 
     const basePayload = {
-      type: values.type,
-      amount: finalAmount,
-      date: isoDate,
+      title: values.title?.trim(),
       description:
-        (values.description?.trim() ||
-          TRANSACTION_TYPES.find((t) => t.value === values.type)?.label) ??
-        values.type,
+        (values.description?.trim()),
     }
 
-    if (isEditMode && transaction) {
-      const patch: TransactionDocUpdate = {
-        ...basePayload,
-        ...(nextReceiptUrl !== undefined ? { receiptUrl: nextReceiptUrl } : {}),
-      }
-      updateTransaction(transaction.id, patch)
+    if (isEditMode && task) {
+
+      updateTask(task.id, basePayload)
     } else {
-      const newTransaction: Omit<Transaction, 'id'> = {
+      const newTask: Omit<Task, 'id'> = {
         ...basePayload,
-        ...(typeof nextReceiptUrl === 'string' ? { receiptUrl: nextReceiptUrl } : {}),
+        items: [],
       }
-      addTransaction(newTransaction, presetId)
+      addTask(newTask, presetId)
     }
 
     reset()
@@ -235,85 +104,26 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
       contentContainerStyle={styles.container}
       keyboardShouldPersistTaps="handled"
     >
-      {/* Type selector */}
-      <Text style={styles.fieldLabel}>Tipo de tarefa</Text>
+      {/* Title */}
+      <Text style={styles.fieldLabel}>Título (opcional)</Text>
       <Controller
         control={control}
-        name="type"
-        render={({ field: { value, onChange } }) => (
-          <>
-            <Pressable
-              style={styles.typeTrigger}
-              onPress={() => setTypeModalVisible(true)}
-            >
-              <Text style={styles.typeTriggerText}>
-                {TRANSACTION_TYPES.find((t) => t.value === value)?.label ?? value}
-              </Text>
-              <Ionicons name="chevron-down" size={20} color="#666" />
-            </Pressable>
-            <Modal
-              visible={typeModalVisible}
-              transparent
-              animationType="fade"
-              onRequestClose={() => setTypeModalVisible(false)}
-            >
-              <Pressable
-                style={styles.modalOverlay}
-                onPress={() => setTypeModalVisible(false)}
-              >
-                <View style={styles.modalContent}>
-                  <Text style={styles.modalTitle}>Selecione o tipo</Text>
-                  {TRANSACTION_TYPES.map((t) => (
-                    <Pressable
-                      key={t.value}
-                      style={[
-                        styles.modalOption,
-                        value === t.value && styles.modalOptionSelected,
-                      ]}
-                      onPress={() => {
-                        onChange(t.value)
-                        setTypeModalVisible(false)
-                      }}
-                    >
-                      <Text
-                        style={[
-                          styles.modalOptionText,
-                          value === t.value && styles.modalOptionTextSelected,
-                        ]}
-                      >
-                        {t.label}
-                      </Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </Pressable>
-            </Modal>
-          </>
+        name="title"
+        render={({ field: { value, onChange, onBlur } }) => (
+          <TextInput
+            style={[styles.input, errors.title && styles.inputError]}
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            placeholder="Título da tarefa"
+            placeholderTextColor="#999"
+            maxLength={120}
+          />
         )}
       />
-      {errors.type && <Text style={styles.errorText}>{errors.type.message}</Text>}
-
-      {/* Amount */}
-      <Text style={styles.fieldLabel}>Valor</Text>
-      <Controller
-        control={control}
-        name="amount"
-        render={({ field: { value, onChange } }) => (
-          <View style={[styles.amountRow, errors.amount && styles.inputError]}>
-            <Text style={styles.currencyPrefix}>R$</Text>
-            <TextInput
-              style={styles.amountInput}
-              value={value}
-              onChangeText={(text) => onChange(formatCurrencyInput(text))}
-              placeholder="0,00"
-              placeholderTextColor="#999"
-              keyboardType="numeric"
-              maxLength={16}
-            />
-          </View>
-        )}
-      />
-      {errors.amount && <Text style={styles.errorText}>{errors.amount.message}</Text>}
+      {errors.title && (
+        <Text style={styles.errorText}>{errors.title.message}</Text>
+      )}
 
       {/* Description */}
       <Text style={styles.fieldLabel}>Descrição (opcional)</Text>
@@ -336,84 +146,10 @@ export function TransactionForm({ transaction, onSuccess }: TransactionFormProps
         <Text style={styles.errorText}>{errors.description.message}</Text>
       )}
 
-      {/* Date */}
-      <Text style={styles.fieldLabel}>Data</Text>
-      <Controller
-        control={control}
-        name="date"
-        render={({ field: { value, onChange, onBlur } }) => (
-          <TextInput
-            style={[styles.input, errors.date && styles.inputError]}
-            value={value}
-            onChangeText={(text) => {
-              let formatted = text.replace(/\D/g, '')
-              if (formatted.length > 2) formatted = `${formatted.slice(0, 2)}/${formatted.slice(2)}`
-              if (formatted.length > 5) formatted = `${formatted.slice(0, 5)}/${formatted.slice(5)}`
-              onChange(formatted.slice(0, 10))
-            }}
-            onBlur={onBlur}
-            placeholder="DD/MM/AAAA"
-            placeholderTextColor="#999"
-            keyboardType="numeric"
-            maxLength={10}
-          />
-        )}
-      />
-      {errors.date && <Text style={styles.errorText}>{errors.date.message}</Text>}
-
-      <Text style={styles.fieldLabel}>Recibo (opcional)</Text>
-      <View style={styles.receiptRow}>
-        <Pressable style={styles.receiptButton} onPress={handlePickReceipt}>
-          <Ionicons name="image-outline" size={18} color="#333" />
-          <Text style={styles.receiptButtonText}>Galeria</Text>
-        </Pressable>
-        <Pressable style={styles.receiptButton} onPress={handleTakePhoto}>
-          <Ionicons name="camera-outline" size={18} color="#333" />
-          <Text style={styles.receiptButtonText}>Câmera</Text>
-        </Pressable>
-        <Pressable style={styles.receiptButton} onPress={handlePickDocument}>
-          <Ionicons name="document-attach-outline" size={18} color="#333" />
-          <Text style={styles.receiptButtonText}>Arquivo</Text>
-        </Pressable>
-        {receiptUri ? (
-          <Pressable
-            style={styles.receiptButton}
-            onPress={() => {
-              setReceiptAttachKind('image')
-              setReceiptPickedLabel(null)
-              setValue('receiptUri', '')
-            }}
-          >
-            <Ionicons name="close-circle-outline" size={18} color="#dc2626" />
-            <Text style={[styles.receiptButtonText, { color: '#dc2626' }]}>Remover</Text>
-          </Pressable>
-        ) : null}
-      </View>
-
-      {receiptUri ? (
-        receiptAttachKind === 'pdf' ? (
-          <View style={styles.receiptFilePreview}>
-            <Ionicons name="document-text-outline" size={44} color="#555" />
-            <Text style={styles.receiptFilePreviewText} numberOfLines={2}>
-              {receiptPickedLabel ?? 'Documento PDF'}
-            </Text>
-          </View>
-        ) : (
-          <Image source={{ uri: receiptUri }} style={styles.receiptPreview} resizeMode="cover" />
-        )
-      ) : null}
-
-      {uploading && (
-        <View style={styles.uploadingRow}>
-          <ActivityIndicator size="small" color="#666" />
-          <Text style={styles.uploadingText}>Enviando recibo...</Text>
-        </View>
-      )}
-
       <PrimaryButton
         label={isEditMode ? 'Salvar alterações' : 'Concluir tarefa'}
         onPress={handleSubmit(onSubmit)}
-        disabled={isSubmitting || uploading}
+        disabled={isSubmitting}
         style={styles.submitButton}
       />
     </ScrollView>

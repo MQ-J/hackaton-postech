@@ -68,7 +68,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             })
             await login(accountFromFirebase)
 
-            import('@/components/TransactionForm').catch(() => { })
+            import('@/components/TaskForm').catch(() => { })
 
             setTimeout(() => {
                 onSuccess()

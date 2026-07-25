@@ -4,33 +4,28 @@ import { doc, getDoc } from 'firebase/firestore'
 
 /** Monta `Account` a partir do documento `users/{uid}` + `uid` do Auth. */
 export function mapFirestoreProfileToAccount(
-  emailFromAuth: string,
+  phoneFromAuth: string,
   data: Partial<Account> | undefined,
   uid: string,
 ): Account {
   if (!data || Object.keys(data).length === 0) {
     return {
-      balance: 0,
-      accountNumber: '0000-0',
-      userName: emailFromAuth.split('@')[0] || 'Usuário',
-      email: emailFromAuth,
-      transactions: [],
+      userName: phoneFromAuth.split('@')[0] || 'Usuário',
+      phone: phoneFromAuth,
+      tasks: [],
       uid,
     }
   }
 
-  const transactions = Array.isArray(data.transactions) ? data.transactions : []
+  const tasks = Array.isArray(data.tasks) ? data.tasks : []
 
   return {
-    balance: typeof data.balance === 'number' ? data.balance : 0,
-    accountNumber:
-      typeof data.accountNumber === 'string' ? data.accountNumber : '0000-0',
     userName: typeof data.userName === 'string' ? data.userName : 'Usuário',
-    email:
-      typeof data.email === 'string' && data.email.length > 0
-        ? data.email
-        : emailFromAuth,
-    transactions,
+    phone:
+      typeof data.phone === 'string' && data.phone.length > 0
+        ? data.phone
+        : phoneFromAuth,
+    tasks,
     uid,
   }
 }

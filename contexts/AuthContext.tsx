@@ -3,8 +3,9 @@ import { db } from '@/lib/firebase'
 import type { Account, FirestoreUserProfile } from '@/lib/types'
 import { fetchUserAccountDocument } from '@/lib/user-account-from-firestore'
 import {
+  ConfirmationResult,
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
+  signInWithPhoneNumber
 } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore'
 import React, { createContext, useCallback, useContext, useMemo } from 'react'
@@ -18,12 +19,13 @@ type SignUpMeta = {
 
 type AuthContextValue = {
   signUp: (
-    email: string,
+    phone: string,
     password: string,
     meta?: SignUpMeta,
   ) => Promise<void>
   /** Firebase Auth + perfil `users/{uid}`. Lança `FirebaseError` em falha. */
-  signIn: (email: string, password: string) => Promise<Account>
+  sendVerificationCode: (phone: string) => Promise<ConfirmationResult>
+  signIn: (verificationCode: string, trimmedPhone: string, confirmation: ConfirmationResult) => Promise<Account>
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -34,17 +36,13 @@ const FIRESTORE_PROFILE_TIMEOUT_MS = 12_000
 async function saveUserProfileToFirestore(
   uid: string,
   userName: string,
-  email: string,
+  phone: string,
 ): Promise<void> {
-  const randomNumber = Math.floor(Math.random() * 10000)
-  const accountNumber = randomNumber.toString().padStart(4, '0') + '-1'
   const ref = doc(db, 'users', uid)
   const payload: FirestoreUserProfile = {
     userName,
-    email,
-    accountNumber,
-    balance: 0,
-    transactions: [],
+    phone,
+    tasks: [],
   }
 
   try {
@@ -69,20 +67,26 @@ async function saveUserProfileToFirestore(
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const signIn = useCallback(async (email: string, password: string) => {
-    const trimmedEmail = email.trim()
-    const cred = await signInWithEmailAndPassword(
+  const sendVerificationCode = useCallback(async (phone: string) => {
+    const trimmedPhone = phone.trim()
+    const confirmation = await signInWithPhoneNumber(
       auth,
-      trimmedEmail,
-      password,
+      trimmedPhone,
     )
-    const emailResolved = cred.user.email ?? trimmedEmail
-    return fetchUserAccountDocument(cred.user.uid, emailResolved)
+
+    return confirmation
+  }, [])
+
+  const signIn = useCallback(async (verificationCode: string, trimmedPhone: string, confirmation: ConfirmationResult) => {
+
+    const userCredential = await confirmation.confirm(verificationCode)
+    const phoneResolved = userCredential.user.phoneNumber ?? trimmedPhone
+    return fetchUserAccountDocument(userCredential.user.uid, phoneResolved)
   }, [])
 
   const signUp = useCallback(
-    (email: string, password: string, meta?: SignUpMeta) => {
-      return createUserWithEmailAndPassword(auth, email, password)
+    (phone: string, password: string, meta?: SignUpMeta) => {
+      return createUserWithEmailAndPassword(auth, phone, password)
         .then(async (userCredential) => {
           console.log(
             'AuthProvider :: signUp - usuário cadastrado com sucesso',
@@ -90,7 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const uid = userCredential.user.uid
 
           if (meta?.userName) {
-            await saveUserProfileToFirestore(uid, meta.userName, email)
+            await saveUserProfileToFirestore(uid, meta.userName, phone)
           }
 
           meta?.onRegistered?.()
@@ -103,7 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [],
   )
 
-  const value = useMemo(() => ({ signUp, signIn }), [signUp, signIn])
+  const value = useMemo(() => ({ signUp, sendVerificationCode, signIn }), [signUp, sendVerificationCode, signIn])
 
   return (
     <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
