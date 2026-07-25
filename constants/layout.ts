@@ -8,6 +8,3 @@ export const TABLET_BREAKPOINT = 480
 
 /** Largura máxima do conteúdo em telas grandes; conteúdo fica centralizado. */
 export const MAX_CONTENT_WIDTH = 800
-
-/** Altura aproximada do footer fixo (px) para padding do scroll. */
-export const FOOTER_HEIGHT = 140
