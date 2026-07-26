@@ -1,21 +1,33 @@
+import { FontSizeModal } from '@/components/FontSizeModal'
 import { Greeting } from '@/components/Greeting'
 import { PrimaryButton } from '@/components/PrimaryButton'
 import { MAX_CONTENT_WIDTH } from '@/constants/layout'
+import {
+  FONT_PRESET_LABELS,
+  useAccessibility,
+} from '@/contexts/AccessibilityContext'
 import { useAccount } from '@/contexts/AccountContext'
 import { useTabletLayout } from '@/hooks/useTabletLayout'
 import { useRouter } from 'expo-router'
-import { ActivityIndicator, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native'
+import { useState } from 'react'
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+} from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-
 
 export default function UserScreen() {
   const { logout, isHydrated } = useAccount()
+  const { fontPreset } = useAccessibility()
   const router = useRouter()
   const { width } = useWindowDimensions()
   const contentWidth = Math.min(width - 32, MAX_CONTENT_WIDTH)
   const centered = width > MAX_CONTENT_WIDTH
   const { isTablet } = useTabletLayout()
-
+  const [fontModalVisible, setFontModalVisible] = useState(false)
 
   const handleLogout = async () => {
     await logout()
@@ -30,8 +42,6 @@ export default function UserScreen() {
     )
   }
 
-
-
   return (
     <SafeAreaView style={styles.safeRoot} edges={['top']}>
       <ScrollView
@@ -43,56 +53,54 @@ export default function UserScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={[styles.content, { width: contentWidth }]}>
-
           <Greeting />
 
           <PrimaryButton
-            label="Modo da interface"
+            label="Modo da interface (em breve)"
             variant="outline"
-            onPress={handleLogout}
+            disabled
             style={styles.userOptionsButton}
-            iconName="log-out-outline"
+            iconName="layers-outline"
           />
 
           <PrimaryButton
-            label="Tamanho da fonte"
+            label={`Tamanho da fonte · ${FONT_PRESET_LABELS[fontPreset]}`}
             variant="outline"
-            onPress={handleLogout}
+            onPress={() => setFontModalVisible(true)}
             style={styles.userOptionsButton}
-            iconName="log-out-outline"
+            iconName="text-outline"
           />
 
           <PrimaryButton
-            label="Contraste"
+            label="Contraste (em breve)"
             variant="outline"
-            onPress={handleLogout}
+            disabled
             style={styles.userOptionsButton}
-            iconName="log-out-outline"
+            iconName="contrast-outline"
           />
 
           <PrimaryButton
-            label="Espaçamento"
+            label="Espaçamento (em breve)"
             variant="outline"
-            onPress={handleLogout}
+            disabled
             style={styles.userOptionsButton}
-            iconName="log-out-outline"
+            iconName="expand-outline"
           />
 
           <PrimaryButton
-            label="Feedback reforçado"
+            label="Feedback reforçado (em breve)"
             variant="outline"
-            onPress={handleLogout}
+            disabled
             style={styles.userOptionsButton}
-            iconName="log-out-outline"
+            iconName="notifications-outline"
           />
 
-
           <PrimaryButton
-            label="Exigir confirmação"
+            label="Exigir confirmação (em breve)"
             variant="outline"
-            onPress={handleLogout}
+            disabled
             style={styles.userOptionsButton}
-            iconName="log-out-outline"
+            iconName="shield-checkmark-outline"
           />
 
           <PrimaryButton
@@ -104,6 +112,11 @@ export default function UserScreen() {
           />
         </View>
       </ScrollView>
+
+      <FontSizeModal
+        visible={fontModalVisible}
+        onClose={() => setFontModalVisible(false)}
+      />
     </SafeAreaView>
   )
 }
@@ -124,22 +137,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#25292e',
     paddingHorizontal: 24,
   },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#fff',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.7)',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  emptyButton: {
-    marginTop: 4,
-  },
   scrollContent: {
     paddingVertical: 24,
     paddingHorizontal: 16,
@@ -147,36 +144,6 @@ const styles = StyleSheet.create({
   },
   content: {
     maxWidth: MAX_CONTENT_WIDTH,
-  },
-  section: {
-    marginBottom: 20,
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#eee',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 16,
-  },
-  chartItem: {
-    marginBottom: 16,
-  },
-  chartItemTablet: {
-    flex: 1,
-    marginBottom: 0,
-    marginRight: 16,
   },
   userOptionsButton: {
     marginTop: 16,

@@ -1,4 +1,5 @@
 import { useAccount } from '@/contexts/AccountContext'
+import { useAccessibility } from '@/contexts/AccessibilityContext'
 import type { Task } from '@/lib/types'
 import { theme } from '@/theme/colors'
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -23,6 +24,9 @@ interface TasksListProps {
 
 export default function TasksList({ onEdit }: TasksListProps) {
   const { account, deleteTask } = useAccount()
+  const { scaleFont } = useAccessibility()
+
+  const styles = useMemo(() => createTasksListStyles(scaleFont), [scaleFont])
 
   const [search, setSearch] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<Task | null>(null)
@@ -113,14 +117,14 @@ export default function TasksList({ onEdit }: TasksListProps) {
     }
   }
 
-  const handleDeletePress = (task: Task) => {
+  const handleDeletePress = useCallback((task: Task) => {
     if (Platform.OS === 'web' && deleteModalClearWebTimerRef.current) {
       clearTimeout(deleteModalClearWebTimerRef.current)
       deleteModalClearWebTimerRef.current = null
     }
     setDeleteTarget(task)
     setDeleteModalVisible(true)
-  }
+  }, [])
 
   const handleConfirmDelete = () => {
     if (deleteTarget) {
@@ -129,34 +133,36 @@ export default function TasksList({ onEdit }: TasksListProps) {
     closeDeleteModal()
   }
 
-  const renderItem = ({ item }: { item: Task }) => (
-    <View style={styles.item}>
-      <View style={styles.itemLeft}>
-        <Text style={styles.title} numberOfLines={1}>
-          {item.title}
-        </Text>
-        <Text style={styles.description} numberOfLines={1}>
-          {item.description}
-        </Text>
-
-      </View>
-      <View style={styles.itemRight}>
-        <View style={styles.actionRow}>
-          <Pressable
-            style={[styles.actionButton, styles.editButton]}
-            onPress={() => onEdit(item)}
-          >
-            <Ionicons name="pencil-outline" size={14} color="#1d4ed8" />
-          </Pressable>
-          <Pressable
-            style={[styles.actionButton, styles.deleteButton]}
-            onPress={() => handleDeletePress(item)}
-          >
-            <Ionicons name="trash-outline" size={14} color="#dc2626" />
-          </Pressable>
+  const renderItem = useCallback(
+    ({ item }: { item: Task }) => (
+      <View style={styles.item}>
+        <View style={styles.itemLeft}>
+          <Text style={styles.title} numberOfLines={1}>
+            {item.title}
+          </Text>
+          <Text style={styles.description} numberOfLines={1}>
+            {item.description}
+          </Text>
+        </View>
+        <View style={styles.itemRight}>
+          <View style={styles.actionRow}>
+            <Pressable
+              style={[styles.actionButton, styles.editButton]}
+              onPress={() => onEdit(item)}
+            >
+              <Ionicons name="pencil-outline" size={14} color="#1d4ed8" />
+            </Pressable>
+            <Pressable
+              style={[styles.actionButton, styles.deleteButton]}
+              onPress={() => handleDeletePress(item)}
+            >
+              <Ionicons name="trash-outline" size={14} color="#dc2626" />
+            </Pressable>
+          </View>
         </View>
       </View>
-    </View>
+    ),
+    [styles, onEdit, handleDeletePress],
   )
 
   return (
@@ -295,7 +301,8 @@ export default function TasksList({ onEdit }: TasksListProps) {
   )
 }
 
-const styles = StyleSheet.create({
+function createTasksListStyles(scaleFont: (baseSize: number) => number) {
+  return StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -327,7 +334,7 @@ const styles = StyleSheet.create({
     opacity: 0.75,
   },
   paginationLabel: {
-    fontSize: 14,
+    fontSize: scaleFont(14),
     color: '#aaa',
     minWidth: 120,
     textAlign: 'center',
@@ -355,7 +362,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    fontSize: 14,
+    fontSize: scaleFont(14),
     color: '#eee',
   },
   chipsScroll: {
@@ -441,7 +448,7 @@ const styles = StyleSheet.create({
     paddingTop: 4,
   },
   resultCount: {
-    fontSize: 12,
+    fontSize: scaleFont(12),
     color: '#666',
   },
   clearButton: {
@@ -473,6 +480,12 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 8,
   },
+  title: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: scaleFont(15),
+    marginBottom: 2,
+  },
   typeBadge: {
     alignSelf: 'flex-start',
     backgroundColor: '#2d333b',
@@ -490,7 +503,7 @@ const styles = StyleSheet.create({
   description: {
     color: '#ddd',
     fontWeight: '500',
-    fontSize: 14,
+    fontSize: scaleFont(14),
   },
   date: {
     fontSize: 12,
@@ -535,7 +548,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     color: '#555',
-    fontSize: 15,
+    fontSize: scaleFont(15),
   },
   footer: {
     marginVertical: 16,
@@ -555,15 +568,15 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   deleteModalTitle: {
-    fontSize: 18,
+    fontSize: scaleFont(18),
     fontWeight: '700',
     marginBottom: 8,
     color: '#111',
   },
   deleteModalMessage: {
-    fontSize: 14,
+    fontSize: scaleFont(14),
     color: '#444',
-    lineHeight: 20,
+    lineHeight: scaleFont(20),
     marginBottom: 16,
   },
   deleteModalSummary: {
@@ -574,7 +587,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   deleteModalSummaryLabel: {
-    fontSize: 13,
+    fontSize: scaleFont(13),
     color: '#374151',
   },
   deleteModalSummaryAmount: {
@@ -608,7 +621,7 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
   deleteCancelButtonText: {
-    fontSize: 14,
+    fontSize: scaleFont(14),
     fontWeight: '600',
     color: theme.primary,
   },
@@ -627,9 +640,10 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
   deleteConfirmButtonText: {
-    fontSize: 14,
+    fontSize: scaleFont(14),
     fontWeight: '600',
     color: '#fff',
   },
-})
+  })
+}
 

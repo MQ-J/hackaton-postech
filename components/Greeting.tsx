@@ -1,5 +1,7 @@
 import { useAccount } from "@/contexts/AccountContext";
+import { useAccessibility } from "@/contexts/AccessibilityContext";
 import { useAnimate } from "@/hooks/useAnimate";
+import { useMemo } from "react";
 import { Animated, StyleSheet, Text } from "react-native";
 
 /**
@@ -12,9 +14,30 @@ import { Animated, StyleSheet, Text } from "react-native";
  */
 export function Greeting() {
     const { account } = useAccount()
+    const { scaleFont } = useAccessibility()
     const { opacity, translateY } = useAnimate()
 
     const firstName = account?.userName.split(' ')[0] ?? ''
+
+    const styles = useMemo(
+        () =>
+            StyleSheet.create({
+                header: {
+                    marginBottom: 24,
+                },
+                greeting: {
+                    fontSize: scaleFont(24),
+                    fontWeight: '700',
+                    color: '#fff',
+                    marginBottom: 4,
+                },
+                date: {
+                    fontSize: scaleFont(14),
+                    color: 'rgba(255,255,255,0.7)',
+                },
+            }),
+        [scaleFont],
+    )
 
 
     return (
@@ -41,19 +64,3 @@ function getGreeting(): string {
     const capitalized = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1)
     return `${capitalized}, ${formattedDate}`
 }
-
-const styles = StyleSheet.create({
-    header: {
-        marginBottom: 24,
-    },
-    greeting: {
-        fontSize: 24,
-        fontWeight: '700',
-        color: '#fff',
-        marginBottom: 4,
-    },
-    date: {
-        fontSize: 14,
-        color: 'rgba(255,255,255,0.7)',
-    },
-})
