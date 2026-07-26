@@ -1,5 +1,6 @@
 import { Pressable, Text, StyleSheet, ViewStyle } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { useAccessibility } from '@/contexts/AccessibilityContext'
 import { theme } from '@/theme/colors'
 
 interface PrimaryButtonProps {
@@ -20,6 +21,7 @@ export function PrimaryButton({
   disabled,
 }: PrimaryButtonProps) {
   const isOutline = variant === 'outline'
+  const { scaleFont } = useAccessibility()
 
   return (
     <Pressable
@@ -43,7 +45,7 @@ export function PrimaryButton({
       <Text
         style={[
           styles.label,
-          { color: isOutline ? theme.primaryForeground : theme.primary },
+          { color: isOutline ? theme.primaryForeground : theme.primary, fontSize: scaleFont(14) },
         ]}
       >
         {label}
@@ -74,7 +76,6 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   label: {
-    fontSize: 14,
     fontWeight: '600',
   },
 })
