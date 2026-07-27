@@ -198,7 +198,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
 
     const next: Account = {
       ...baseAccount,
-      tasks: [newTask, ...baseAccount.tasks],
+      tasks: [...baseAccount.tasks, newTask],
     }
 
     setAccount(next)
