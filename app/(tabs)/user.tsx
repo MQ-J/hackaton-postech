@@ -1,15 +1,16 @@
+import { ColorContrastModal } from '@/components/ColorContrastModal'
 import { FontSizeModal } from '@/components/FontSizeModal'
 import { Greeting } from '@/components/Greeting'
 import { PrimaryButton } from '@/components/PrimaryButton'
 import { MAX_CONTENT_WIDTH } from '@/constants/layout'
 import {
+  COLOR_CONTRAST_LABELS,
+  ColorContrastPreset,
   FONT_PRESET_LABELS,
   useAccessibility,
 } from '@/contexts/AccessibilityContext'
 import { useAccount } from '@/contexts/AccountContext'
-import { useTabletLayout } from '@/hooks/useTabletLayout'
-import { useRouter } from 'expo-router'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   ActivityIndicator,
   ScrollView,
@@ -20,19 +21,15 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function UserScreen() {
-  const { logout, isHydrated } = useAccount()
-  const { fontPreset } = useAccessibility()
-  const router = useRouter()
+  const { isHydrated } = useAccount()
+  const { scaleFont, fontPreset, colorContrast } = useAccessibility()
   const { width } = useWindowDimensions()
   const contentWidth = Math.min(width - 32, MAX_CONTENT_WIDTH)
   const centered = width > MAX_CONTENT_WIDTH
-  const { isTablet } = useTabletLayout()
   const [fontModalVisible, setFontModalVisible] = useState(false)
+  const [colorContrastModalVisible, setColorContrastModalVisible] = useState(false)
 
-  const handleLogout = async () => {
-    await logout()
-    router.replace('/(auth)/login')
-  }
+  const styles = useMemo(() => createUserScreenStyles(scaleFont, colorContrast), [scaleFont, colorContrast])
 
   if (!isHydrated) {
     return (
@@ -72,9 +69,9 @@ export default function UserScreen() {
           />
 
           <PrimaryButton
-            label="Contraste (em breve)"
+            label={`Contraste · ${COLOR_CONTRAST_LABELS[colorContrast]}`}
             variant="outline"
-            disabled
+            onPress={() => setColorContrastModalVisible(true)}
             style={styles.userOptionsButton}
             iconName="contrast-outline"
           />
@@ -103,13 +100,6 @@ export default function UserScreen() {
             iconName="shield-checkmark-outline"
           />
 
-          <PrimaryButton
-            label="Sair"
-            variant="outline"
-            onPress={handleLogout}
-            style={styles.userOptionsButton}
-            iconName="log-out-outline"
-          />
         </View>
       </ScrollView>
 
@@ -117,35 +107,43 @@ export default function UserScreen() {
         visible={fontModalVisible}
         onClose={() => setFontModalVisible(false)}
       />
+
+      <ColorContrastModal
+        visible={colorContrastModalVisible}
+        onClose={() => setColorContrastModalVisible(false)}
+      />
     </SafeAreaView>
   )
 }
 
-const styles = StyleSheet.create({
-  safeRoot: {
-    flex: 1,
-    backgroundColor: '#25292e',
-  },
-  scroll: {
-    flex: 1,
-    backgroundColor: '#25292e',
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#25292e',
-    paddingHorizontal: 24,
-  },
-  scrollContent: {
-    paddingVertical: 24,
-    paddingHorizontal: 16,
-    paddingBottom: 40,
-  },
-  content: {
-    maxWidth: MAX_CONTENT_WIDTH,
-  },
-  userOptionsButton: {
-    marginTop: 16,
-  },
-})
+function createUserScreenStyles(scaleFont: (baseSize: number) => number, colorContrast: ColorContrastPreset) {
+  return StyleSheet.create({
+    safeRoot: {
+      flex: 1,
+      backgroundColor: '#25292e',
+    },
+    scroll: {
+      flex: 1,
+      backgroundColor: '#25292e',
+    },
+    loadingContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#25292e',
+      paddingHorizontal: 24,
+    },
+    scrollContent: {
+      paddingVertical: 24,
+      paddingHorizontal: 16,
+      paddingBottom: 40,
+    },
+    content: {
+      maxWidth: MAX_CONTENT_WIDTH,
+    },
+    userOptionsButton: {
+      marginTop: 16,
+      backgroundColor: colorContrast === 'normal' ? undefined : '#0B0B0E',
+    },
+  })
+}

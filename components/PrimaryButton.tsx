@@ -1,7 +1,7 @@
-import { Pressable, Text, StyleSheet, ViewStyle } from 'react-native'
-import Ionicons from '@expo/vector-icons/Ionicons'
 import { useAccessibility } from '@/contexts/AccessibilityContext'
 import { theme } from '@/theme/colors'
+import Ionicons from '@expo/vector-icons/Ionicons'
+import { Pressable, StyleSheet, Text, ViewStyle } from 'react-native'
 
 interface PrimaryButtonProps {
   label: string
@@ -37,7 +37,7 @@ export function PrimaryButton({
       {iconName ? (
         <Ionicons
           name={iconName}
-          size={18}
+          size={scaleFont(18)}
           color={isOutline ? theme.primaryForeground : theme.primary}
           style={{ marginRight: 6 }}
         />
