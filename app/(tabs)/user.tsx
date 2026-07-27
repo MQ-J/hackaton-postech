@@ -1,6 +1,6 @@
+import { AppLogo } from '@/components/AppLogo'
 import { ColorContrastModal } from '@/components/ColorContrastModal'
 import { FontSizeModal } from '@/components/FontSizeModal'
-import { Greeting } from '@/components/Greeting'
 import { PrimaryButton } from '@/components/PrimaryButton'
 import { MAX_CONTENT_WIDTH } from '@/constants/layout'
 import {
@@ -50,7 +50,7 @@ export default function UserScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={[styles.content, { width: contentWidth }]}>
-          <Greeting />
+          <AppLogo />
 
           <PrimaryButton
             label="Modo da interface (em breve)"

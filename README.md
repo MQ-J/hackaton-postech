@@ -113,7 +113,6 @@ Camada compartilhada com tokens de design (tipografia, contraste, espaçamento) 
 | **Arquitetura** | Clean Architecture (Domain / Data / Presentation), módulos independentes |
 | **Estado** | Context API / hooks de estado por módulo |
 | **Formulários e validação** | React Hook Form, Zod |
-| **Backend / cloud** | Firebase (Auth, Firestore, Storage) |
 | **Acessibilidade** | Tokens de design (fonte, contraste, espaçamento), `react-native-safe-area-context`, ARIA (web) |
 | **UI e feedback** | Componentes de feedback visual reforçado, animações suaves e controláveis |
 | **Testes** | Jest / Testing Library |
@@ -155,12 +154,6 @@ npx expo start
 ```
 
 Utilize o QR code no terminal para abrir no **Expo Go** ou as teclas do CLI para abrir em **web**, **Android** ou **iOS**.
-
-### Firebase (backend compartilhado)
-
-1. Crie um projeto no [Firebase Console](https://console.firebase.google.com/) e ative **Authentication**, **Firestore** e **Storage**.
-2. Copie as chaves do SDK para o arquivo de configuração de cada app (web e mobile).
-3. Configure as **regras do Firestore** e **Storage** para as coleções de perfil, preferências de acessibilidade e atividades.
 
 ---
 
