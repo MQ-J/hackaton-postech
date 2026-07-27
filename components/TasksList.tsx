@@ -23,7 +23,7 @@ interface TasksListProps {
 
 export default function TasksList({ onEdit }: TasksListProps) {
   const { account, deleteTask } = useAccount()
-  const { scaleFont, colorContrast } = useAccessibility()
+  const { scaleFont, colorContrast, interfaceMode } = useAccessibility()
 
   const styles = useMemo(() => createTasksListStyles(scaleFont, colorContrast), [scaleFont, colorContrast])
 
@@ -144,7 +144,14 @@ export default function TasksList({ onEdit }: TasksListProps) {
               !!item.items.length && (
                 <View>
                   {item.items.map((subitem, index) => (
-                    <Text key={index} style={styles.description} numberOfLines={1}>
+                    <Text
+                      key={index}
+                      style={[
+                        styles.subItem,
+                        interfaceMode === 'advanced' && subitem.checked && styles.subitemChecked,
+                      ]}
+                      numberOfLines={1}
+                    >
                       • {subitem.description}
                     </Text>
                   ))}
@@ -466,6 +473,12 @@ function createTasksListStyles(scaleFont: (baseSize: number) => number, colorCon
       color: '#ddd',
       fontWeight: '500',
       fontSize: scaleFont(14),
+      marginBottom: 8,
+    },
+    subItem: {
+      color: '#ddd',
+      fontWeight: '500',
+      fontSize: scaleFont(14),
     },
     date: {
       fontSize: 12,
@@ -567,6 +580,10 @@ function createTasksListStyles(scaleFont: (baseSize: number) => number, colorCon
     },
     deleteModalAmountNegative: {
       color: '#dc2626',
+    },
+    subitemChecked: {
+      textDecorationLine: 'line-through',
+      color: '#999',
     },
     deleteModalActions: {
       flexDirection: 'row',

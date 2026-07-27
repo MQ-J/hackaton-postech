@@ -16,9 +16,9 @@ O **SeniorEase** nasce para resolver isso, promovendo **autonomia, confiança e 
 
 ### Painel de Personalização da Experiência
 - [x] Ajuste de tamanho da fonte
-- [ ] Ajuste de nível de contraste
+- [X] Ajuste de nível de contraste
 - [ ] Ajuste de espaçamento entre elementos
-- [ ] Simplificação da interface (modo básico / modo avançado)
+- [X] Simplificação da interface (modo básico / modo avançado)
 - [ ] Ativação de feedback visual reforçado
 - [ ] Confirmação adicional antes de ações críticas
 

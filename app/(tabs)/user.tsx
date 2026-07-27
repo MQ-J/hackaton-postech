@@ -1,12 +1,14 @@
 import { AppLogo } from '@/components/AppLogo'
 import { ColorContrastModal } from '@/components/ColorContrastModal'
 import { FontSizeModal } from '@/components/FontSizeModal'
+import { InterfaceModeModal } from '@/components/InterfaceModeModal'
 import { PrimaryButton } from '@/components/PrimaryButton'
 import { MAX_CONTENT_WIDTH } from '@/constants/layout'
 import {
   COLOR_CONTRAST_LABELS,
   ColorContrastPreset,
   FONT_PRESET_LABELS,
+  INTERFACE_MODE_LABELS,
   useAccessibility,
 } from '@/contexts/AccessibilityContext'
 import { useAccount } from '@/contexts/AccountContext'
@@ -22,10 +24,11 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function UserScreen() {
   const { isHydrated } = useAccount()
-  const { scaleFont, fontPreset, colorContrast } = useAccessibility()
+  const { scaleFont, fontPreset, colorContrast, interfaceMode } = useAccessibility()
   const { width } = useWindowDimensions()
   const contentWidth = Math.min(width - 32, MAX_CONTENT_WIDTH)
   const centered = width > MAX_CONTENT_WIDTH
+  const [interfaceModeModalVisible, setInterfaceModeModalVisible] = useState(false)
   const [fontModalVisible, setFontModalVisible] = useState(false)
   const [colorContrastModalVisible, setColorContrastModalVisible] = useState(false)
 
@@ -53,9 +56,9 @@ export default function UserScreen() {
           <AppLogo />
 
           <PrimaryButton
-            label="Modo da interface (em breve)"
+            label={`Modo da interface · ${INTERFACE_MODE_LABELS[interfaceMode]}`}
             variant="outline"
-            disabled
+            onPress={() => setInterfaceModeModalVisible(true)}
             style={styles.userOptionsButton}
             iconName="layers-outline"
           />
@@ -102,6 +105,11 @@ export default function UserScreen() {
 
         </View>
       </ScrollView>
+
+      <InterfaceModeModal
+        visible={interfaceModeModalVisible}
+        onClose={() => setInterfaceModeModalVisible(false)}
+      />
 
       <FontSizeModal
         visible={fontModalVisible}

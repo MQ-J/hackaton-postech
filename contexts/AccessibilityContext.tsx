@@ -10,6 +10,7 @@ import React, {
 
 export type FontSizePreset = 'normal' | 'large' | 'extraLarge'
 export type ColorContrastPreset = 'normal' | 'high'
+export type InterfaceModePreset = 'basic' | 'advanced'
 
 const STORAGE_KEY = 'seniorease_accessibility'
 
@@ -30,17 +31,25 @@ export const COLOR_CONTRAST_LABELS: Record<ColorContrastPreset, string> = {
   high: 'Alto contraste',
 }
 
+export const INTERFACE_MODE_LABELS: Record<InterfaceModePreset, string> = {
+  basic: 'Básico',
+  advanced: 'Avançado',
+}
+
 type AccessibilityPreferences = {
   fontPreset: FontSizePreset
   colorContrast: ColorContrastPreset
+  interfaceMode: InterfaceModePreset
 }
 
 type AccessibilityContextValue = {
   fontPreset: FontSizePreset
   colorContrast: ColorContrastPreset
+  interfaceMode: InterfaceModePreset
   fontScale: number
   setFontPreset: (preset: FontSizePreset) => Promise<void>
   setColorContrast: (preset: ColorContrastPreset) => Promise<void>
+  setInterfaceMode: (preset: InterfaceModePreset) => Promise<void>
   scaleFont: (baseSize: number) => number
   isHydrated: boolean
 }
@@ -48,6 +57,7 @@ type AccessibilityContextValue = {
 const defaultPreferences: AccessibilityPreferences = {
   fontPreset: 'normal',
   colorContrast: 'normal',
+  interfaceMode: 'basic',
 }
 
 const AccessibilityContext = createContext<AccessibilityContextValue | undefined>(
@@ -62,6 +72,10 @@ function isColorContrastPreset(value: unknown): value is ColorContrastPreset {
   return value === 'normal' || value === 'high'
 }
 
+function isInterfaceModePreset(value: unknown): value is InterfaceModePreset {
+  return value === 'default' || value === 'compact' || value === 'spacious'
+}
+
 async function loadPreferences(): Promise<AccessibilityPreferences> {
   try {
     const raw = await AsyncStorage.getItem(STORAGE_KEY)
@@ -74,8 +88,11 @@ async function loadPreferences(): Promise<AccessibilityPreferences> {
     const colorContrast = isColorContrastPreset(parsed.colorContrast)
       ? parsed.colorContrast
       : defaultPreferences.colorContrast
+    const interfaceMode = isInterfaceModePreset(parsed.interfaceMode)
+      ? parsed.interfaceMode
+      : defaultPreferences.interfaceMode
 
-    return { fontPreset, colorContrast }
+    return { fontPreset, colorContrast, interfaceMode }
   } catch {
     /* usa padrão */
   }
@@ -89,6 +106,7 @@ async function savePreferences(prefs: AccessibilityPreferences): Promise<void> {
 export function AccessibilityProvider({ children }: { children: React.ReactNode }) {
   const [fontPreset, setFontPresetState] = useState<FontSizePreset>('normal')
   const [colorContrast, setColorContrastState] = useState<ColorContrastPreset>('normal')
+  const [interfaceMode, setInterfaceModeState] = useState<InterfaceModePreset>('basic')
   const [isHydrated, setIsHydrated] = useState(false)
 
   useEffect(() => {
@@ -97,6 +115,7 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
       if (cancelled) return
       setFontPresetState(prefs.fontPreset)
       setColorContrastState(prefs.colorContrast)
+      setInterfaceModeState(prefs.interfaceMode)
       setIsHydrated(true)
     })
     return () => {
@@ -113,25 +132,32 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
 
   const setFontPreset = useCallback(async (preset: FontSizePreset) => {
     setFontPresetState(preset)
-    await savePreferences({ fontPreset: preset, colorContrast })
-  }, [colorContrast])
+    await savePreferences({ fontPreset: preset, colorContrast, interfaceMode })
+  }, [colorContrast, interfaceMode])
 
   const setColorContrast = useCallback(async (preset: ColorContrastPreset) => {
     setColorContrastState(preset)
-    await savePreferences({ fontPreset, colorContrast: preset })
-  }, [fontPreset])
+    await savePreferences({ fontPreset, colorContrast: preset, interfaceMode })
+  }, [fontPreset, interfaceMode])
+
+  const setInterfaceMode = useCallback(async (preset: InterfaceModePreset) => {
+    setInterfaceModeState(preset)
+    await savePreferences({ fontPreset, colorContrast, interfaceMode: preset })
+  }, [fontPreset, colorContrast])
 
   const value = useMemo(
     () => ({
       fontPreset,
       colorContrast,
+      interfaceMode,
       fontScale,
       setFontPreset,
       setColorContrast,
+      setInterfaceMode,
       scaleFont,
       isHydrated,
     }),
-    [fontPreset, colorContrast, fontScale, setFontPreset, setColorContrast, scaleFont, isHydrated],
+    [fontPreset, colorContrast, interfaceMode, fontScale, setFontPreset, setColorContrast, setInterfaceMode, scaleFont, isHydrated],
   )
 
   return (
