@@ -8,11 +8,30 @@ import {
   updateUserProfileTasks,
   type TaskDocUpdate,
 } from '@/lib/firestore'
-import { removeSecureItem, setSecureItem } from '@/lib/storage'
+import { getSecureItem, removeSecureItem, setSecureItem } from '@/lib/storage'
 import type { Account, Task } from '@/lib/types'
 import { fetchUserAccountDocument } from '@/lib/user-account-from-firestore'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import Toast from 'react-native-toast-message'
+
+const LOCAL_TASKS_STORAGE_KEY = 'localTasks'
+
+function createLocalAccount(tasks: Task[] = []): Account {
+  return {
+    userName: '',
+    phone: '',
+    tasks,
+  }
+}
+
+async function getStoredLocalTasks(): Promise<Task[]> {
+  const storedTasks = await getSecureItem<Task[]>(LOCAL_TASKS_STORAGE_KEY)
+  return Array.isArray(storedTasks) ? storedTasks : []
+}
+
+async function persistLocalTasks(tasks: Task[]): Promise<void> {
+  await setSecureItem(LOCAL_TASKS_STORAGE_KEY, tasks)
+}
 
 interface AccountContextType {
   account: Account | null
@@ -60,7 +79,9 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
       if (cancelled) return
 
       if (!user) {
-        setAccount(null)
+        const localTasks = await getStoredLocalTasks()
+        if (cancelled) return
+        setAccount(createLocalAccount(localTasks))
         await removeSecureItem('currentAccount')
         setIsHydrated(true)
         return
@@ -95,6 +116,12 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
       if (account === null) {
         return
       }
+
+      const hasAuthSession = Boolean(account.uid || auth.currentUser?.uid)
+      if (!hasAuthSession) {
+        return
+      }
+
       const { tasks: _, ...meta } = account
       await setSecureItem('currentAccount', meta)
     }
@@ -123,7 +150,8 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   }
 
   const logout = async () => {
-    setAccount(null)
+    const localTasks = await getStoredLocalTasks()
+    setAccount(createLocalAccount(localTasks))
     await removeSecureItem('currentAccount')
     try {
       await signOutSection()
@@ -161,7 +189,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     taskData: Omit<Task, 'id'>,
     presetId?: string,
   ) => {
-    if (!account) return
+    const baseAccount = account ?? createLocalAccount([])
 
     const newTask: Task = {
       ...taskData,
@@ -169,27 +197,41 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     }
 
     const next: Account = {
-      ...account,
-      tasks: [newTask, ...account.tasks],
+      ...baseAccount,
+      tasks: [...baseAccount.tasks, newTask],
     }
 
     setAccount(next)
-    void syncFirebaseAfterMutation(next, () =>
-      addTaskDoc(account.accountNumber, newTask),
-    )
+
+    const hasAuthSession = Boolean(baseAccount.uid || auth.currentUser?.uid)
+    const accountNumber = (baseAccount as Account & { accountNumber?: string }).accountNumber
+
+    if (hasAuthSession && accountNumber) {
+      void syncFirebaseAfterMutation(next, () =>
+        addTaskDoc(accountNumber, newTask),
+      )
+      Toast.show({
+        type: 'success',
+        text1: 'Tarefa adicionada com sucesso',
+      })
+      return
+    }
+
+    void persistLocalTasks(next.tasks)
     Toast.show({
       type: 'success',
-      text1: 'Tarefa adicionada com sucesso',
+      text1: 'Tarefa salva localmente',
+      text2: 'Ela ficará disponível enquanto você não entrar na conta.',
     })
   }
 
   const updateTask = (id: string, updatedData: TaskDocUpdate) => {
-    if (!account) return
+    const baseAccount = account ?? createLocalAccount([])
 
-    const taskToUpdate = account.tasks.find((t) => t.id === id)
+    const taskToUpdate = baseAccount.tasks.find((t) => t.id === id)
     if (!taskToUpdate) return
 
-    const newTasks = account.tasks.map((t) => {
+    const newTasks = baseAccount.tasks.map((t) => {
       if (t.id !== id) return t
 
       const mergedBase: Task = { ...t, ...updatedData, id }
@@ -198,37 +240,59 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     })
 
     const next: Account = {
-      ...account,
+      ...baseAccount,
       tasks: newTasks,
     }
 
     setAccount(next)
-    void syncFirebaseAfterMutation(
-      next,
-      () => updateTaskDoc(account.accountNumber, id, updatedData), undefined,
-    )
+
+    const hasAuthSession = Boolean(baseAccount.uid || auth.currentUser?.uid)
+    const accountNumber = (baseAccount as Account & { accountNumber?: string }).accountNumber
+
+    if (hasAuthSession && accountNumber) {
+      void syncFirebaseAfterMutation(
+        next,
+        () => updateTaskDoc(accountNumber, id, updatedData), undefined,
+      )
+      Toast.show({
+        type: 'success',
+        text1: 'Tarefa atualizada com sucesso',
+      })
+      return
+    }
+
+    void persistLocalTasks(next.tasks)
     Toast.show({
       type: 'success',
-      text1: 'Tarefa atualizada com sucesso',
+      text1: 'Tarefa atualizada localmente',
     })
   }
 
   const deleteTask = (id: string) => {
-    if (!account) return
+    const baseAccount = account ?? createLocalAccount([])
 
-    const taskToDelete = account.tasks.find((t) => t.id === id)
+    const taskToDelete = baseAccount.tasks.find((t) => t.id === id)
     if (!taskToDelete) return
 
     const next: Account = {
-      ...account,
-      tasks: account.tasks.filter((t) => t.id !== id),
+      ...baseAccount,
+      tasks: baseAccount.tasks.filter((t) => t.id !== id),
     }
 
     setAccount(next)
-    void syncFirebaseAfterMutation(
-      next,
-      () => deleteTaskDoc(account.accountNumber, id), undefined,
-    )
+
+    const hasAuthSession = Boolean(baseAccount.uid || auth.currentUser?.uid)
+    const accountNumber = (baseAccount as Account & { accountNumber?: string }).accountNumber
+
+    if (hasAuthSession && accountNumber) {
+      void syncFirebaseAfterMutation(
+        next,
+        () => deleteTaskDoc(accountNumber, id), undefined,
+      )
+      return
+    }
+
+    void persistLocalTasks(next.tasks)
   }
 
   return (

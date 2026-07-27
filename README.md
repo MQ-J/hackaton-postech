@@ -15,7 +15,7 @@ O **SeniorEase** nasce para resolver isso, promovendo **autonomia, confiança e 
 ## ✅ Requisitos do desafio
 
 ### Painel de Personalização da Experiência
-- [ ] Ajuste de tamanho da fonte
+- [x] Ajuste de tamanho da fonte
 - [ ] Ajuste de nível de contraste
 - [ ] Ajuste de espaçamento entre elementos
 - [ ] Simplificação da interface (modo básico / modo avançado)
@@ -23,7 +23,7 @@ O **SeniorEase** nasce para resolver isso, promovendo **autonomia, confiança e 
 - [ ] Confirmação adicional antes de ações críticas
 
 ### Organizador de Atividades Simplificado
-- [ ] Lista de tarefas com visual simples e direto
+- [x] Lista de tarefas com visual simples e direto
 - [ ] Etapas guiadas para execução de atividades
 - [ ] Lembretes com linguagem clara
 - [ ] Avisos de conclusão com feedback positivo

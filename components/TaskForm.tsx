@@ -1,6 +1,5 @@
 import { PrimaryButton } from '@/components/PrimaryButton'
 import { useAccount } from '@/contexts/AccountContext'
-import { auth } from '@/firebase/config'
 import {
   type TaskFormValues,
   taskSchema
@@ -20,8 +19,8 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TextInputKeyPressEvent,
-  View,
+  TextInputSubmitEditingEvent,
+  View
 } from 'react-native'
 
 import Toast from 'react-native-toast-message'
@@ -39,6 +38,7 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
   const {
     control,
     handleSubmit,
+    setFocus,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<TaskFormValues>({
@@ -49,7 +49,7 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
       items: task?.items?.map((item) => ({
         description: item.description,
         checked: item.checked,
-      })) || [{}],
+      })) || [{ description: '', checked: false }],
     },
   })
 
@@ -72,10 +72,20 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
       reset({
         title: '',
         description: '',
-        items: [{}],
+        items: [{ description: '', checked: false }],
       })
     }
   }, [task, reset])
+
+  // Small timeout ensures the modal native transition finishes rendering the input
+  useEffect(() => {
+    if (!task) {
+      const timer = setTimeout(() => {
+        setFocus('items.0.description');
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [task, setFocus]);
 
   const onSubmit = async (values: TaskFormValues) => {
     if (!account) {
@@ -87,19 +97,19 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
       return
     }
 
-    const uid = account.uid ?? auth.currentUser?.uid
-    if (!uid) {
-      Toast.show({
-        type: 'error',
-        text1: 'Sessão inválida',
-        text2: 'Não foi possível identificar o usuário para enviar o arquivo.',
-      })
-      return
-    }
+    // const uid = account.uid ?? auth.currentUser?.uid
+    // if (!uid) {
+    //   Toast.show({
+    //     type: 'error',
+    //     text1: 'Sessão inválida',
+    //     text2: 'Não foi possível identificar o usuário para enviar o arquivo.',
+    //   })
+    //   return
+    // }
 
     const presetId = isEditMode && task ? task.id : Date.now().toString()
 
-    const itemsPayload: Task['items'] = (values.items ?? []).map((item, index) => ({
+    const itemsPayload: Task['items'] = (values.items ?? []).filter(item => !!item.description).map((item, index) => ({
       id: item.id ?? `${Date.now()}-${index}`,
       description: item.description.trim(),
       checked: item.checked,
@@ -124,12 +134,13 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
     onSuccess?.()
   }
 
-  const handleKeyPress = (e: TextInputKeyPressEvent) => {
-    const pressedKey = e.nativeEvent.key;
+  const handleAction = (e: TextInputSubmitEditingEvent) => {
+    const submittedText = e.nativeEvent.text;
 
-    if (pressedKey === 'Enter') {
-      append({ description: '', checked: false });
-    }
+    if (!submittedText.trim()) return;
+
+    append({ description: '', checked: false });
+
   };
 
   return (
@@ -149,7 +160,6 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
-            onKeyPress={handleKeyPress}
             placeholder="Título da tarefa"
             placeholderTextColor="#999"
             maxLength={120}
@@ -161,7 +171,7 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
       )}
 
       {/* Description */}
-      <Text style={styles.fieldLabel}>Descrição (opcional)</Text>
+      {/* <Text style={styles.fieldLabel}>Descrição (opcional)</Text>
       <Controller
         control={control}
         name="description"
@@ -179,7 +189,7 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
       />
       {errors.description && (
         <Text style={styles.errorText}>{errors.description.message}</Text>
-      )}
+      )} */}
 
       <Text style={styles.fieldLabel}>Itens da lista</Text>
       {fields.map((field, index) => (
@@ -187,8 +197,9 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
           <Controller
             control={control}
             name={`items.${index}.description`}
-            render={({ field: { value, onChange, onBlur } }) => (
+            render={({ field: { value, onChange, onBlur, ref } }) => (
               <TextInput
+                ref={ref}
                 style={[
                   styles.input,
                   styles.itemInput,
@@ -196,6 +207,8 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
                 ]}
                 value={value}
                 onChangeText={onChange}
+                onSubmitEditing={handleAction}
+                submitBehavior="submit"
                 onBlur={onBlur}
                 placeholder={`Item ${index + 1}`}
                 placeholderTextColor="#999"
@@ -203,20 +216,23 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
               />
             )}
           />
-          <Pressable onPress={() => remove(index)} style={styles.removeButton}>
-            <Text style={styles.removeButtonText}>Remover</Text>
-          </Pressable>
+          {
+            fields.length === (index + 1) ? (
+              <Pressable onPress={() => append({ description: '', checked: false })} style={styles.addButton}>
+                <Text style={styles.addButtonText}>Adicionar</Text>
+              </Pressable>
+            ) : (
+              <Pressable onPress={() => remove(index)} style={styles.removeButton}>
+                <Text style={styles.removeButtonText}>Remover</Text>
+              </Pressable>
+            )
+          }
+
         </View>
       ))}
       {errors.items?.message ? (
         <Text style={styles.errorText}>{errors.items.message}</Text>
       ) : null}
-
-      <PrimaryButton
-        label="Adicionar item"
-        onPress={() => append({ description: '', checked: false })}
-        style={styles.addItemButton}
-      />
 
       <PrimaryButton
         label={isEditMode ? 'Salvar alterações' : 'Salvar lista'}
@@ -322,9 +338,17 @@ const styles = StyleSheet.create({
   itemInput: {
     flex: 1,
   },
+  addButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
   removeButton: {
     paddingVertical: 8,
     paddingHorizontal: 10,
+  },
+  addButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   removeButtonText: {
     color: '#dc2626',
