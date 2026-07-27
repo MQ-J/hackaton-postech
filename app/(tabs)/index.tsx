@@ -1,7 +1,7 @@
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { TaskForm } from '@/components/TaskForm';
 import TasksList from '@/components/TasksList';
-import { useAccessibility } from '@/contexts/AccessibilityContext';
+import { ColorContrastPreset, useAccessibility } from '@/contexts/AccessibilityContext';
 import { useAnimate } from '@/hooks/useAnimate';
 import type { Task } from '@/lib/types';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -21,9 +21,9 @@ export default function TasksScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [hasOpenedModal, setHasOpenedModal] = useState(false);
-  const { scaleFont } = useAccessibility()
+  const { scaleFont, colorContrast } = useAccessibility()
 
-  const styles = useMemo(() => createTasksScreenStyles(scaleFont), [scaleFont])
+  const styles = useMemo(() => createTasksScreenStyles(scaleFont, colorContrast), [scaleFont, colorContrast])
 
   const { opacity, translateY } = useAnimate()
 
@@ -88,7 +88,7 @@ export default function TasksScreen() {
   );
 }
 
-function createTasksScreenStyles(scaleFont: (baseSize: number) => number) {
+function createTasksScreenStyles(scaleFont: (baseSize: number) => number, colorContrast: ColorContrastPreset) {
   return StyleSheet.create({
     safeRoot: {
       flex: 1,
@@ -105,6 +105,7 @@ function createTasksScreenStyles(scaleFont: (baseSize: number) => number) {
       width: scaleFont(112),
       height: scaleFont(45),
       borderRadius: 28,
+      borderColor: colorContrast === 'normal' ? undefined : '#f5f5f5',
       backgroundColor: '#ffd33d',
       alignItems: 'center',
       justifyContent: 'center',

@@ -1,4 +1,4 @@
-import { useAccessibility } from '@/contexts/AccessibilityContext'
+import { ColorContrastPreset, useAccessibility } from '@/contexts/AccessibilityContext'
 import { useAccount } from '@/contexts/AccountContext'
 import type { Task } from '@/lib/types'
 import { theme } from '@/theme/colors'
@@ -23,9 +23,9 @@ interface TasksListProps {
 
 export default function TasksList({ onEdit }: TasksListProps) {
   const { account, deleteTask } = useAccount()
-  const { scaleFont } = useAccessibility()
+  const { scaleFont, colorContrast } = useAccessibility()
 
-  const styles = useMemo(() => createTasksListStyles(scaleFont), [scaleFont])
+  const styles = useMemo(() => createTasksListStyles(scaleFont, colorContrast), [scaleFont, colorContrast])
 
   const [deleteTarget, setDeleteTarget] = useState<Task | null>(null)
   const [deleteModalVisible, setDeleteModalVisible] = useState(false)
@@ -292,7 +292,7 @@ export default function TasksList({ onEdit }: TasksListProps) {
   )
 }
 
-function createTasksListStyles(scaleFont: (baseSize: number) => number) {
+function createTasksListStyles(scaleFont: (baseSize: number) => number, colorContrast: ColorContrastPreset) {
   return StyleSheet.create({
     container: {
       flex: 1,
@@ -431,7 +431,7 @@ function createTasksListStyles(scaleFont: (baseSize: number) => number) {
       marginVertical: 4,
       marginHorizontal: 16,
       borderRadius: 10,
-      backgroundColor: '#1e2329',
+      backgroundColor: colorContrast === 'normal' ? '#1e2329' : '#0B0B0E',
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.2,
