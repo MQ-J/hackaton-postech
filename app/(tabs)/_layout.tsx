@@ -1,6 +1,8 @@
+import { useAccessibility } from '@/contexts/AccessibilityContext'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { Tabs } from 'expo-router'
-import { Platform } from 'react-native'
+import { useMemo } from 'react'
+import { Platform, StyleSheet } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function TabLayout() {
@@ -9,6 +11,10 @@ export default function TabLayout() {
   // Web costuma ter insets.bottom = 0; altura fixa baixa corta ícone + label.
   const tabBarBottom = Math.max(insets.bottom, isWeb ? 12 : 8)
   const tabBarInnerMin = isWeb ? 58 : 48
+
+  const { scaleFont } = useAccessibility()
+
+  const styles = useMemo(() => createTabLayoutStyles(scaleFont), [scaleFont])
 
   return (
     <Tabs
@@ -28,8 +34,11 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Tarefas',
+          headerTitleStyle: {
+
+          },
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'checkmark-done-sharp' : 'checkmark-done-outline'} color={color} size={24} />
+            <Ionicons name={focused ? 'checkmark-done-sharp' : 'checkmark-done-outline'} color={color} style={styles.menuIcon} />
           ),
         }}
       />
@@ -37,11 +46,20 @@ export default function TabLayout() {
         name="user"
         options={{
           title: 'Perfil',
+          headerTitleAllowFontScaling: true,
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'person-circle' : 'person-circle-outline'} color={color} size={24} />
+            <Ionicons name={focused ? 'person-circle' : 'person-circle-outline'} color={color} style={styles.menuIcon} />
           ),
         }}
       />
     </Tabs>
   )
+}
+
+function createTabLayoutStyles(scaleFont: (baseSize: number) => number) {
+  return StyleSheet.create({
+    menuIcon: {
+      fontSize: scaleFont(24)
+    },
+  })
 }
