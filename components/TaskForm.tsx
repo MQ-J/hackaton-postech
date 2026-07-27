@@ -109,7 +109,7 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
 
     const presetId = isEditMode && task ? task.id : Date.now().toString()
 
-    const itemsPayload: Task['items'] = (values.items ?? []).map((item, index) => ({
+    const itemsPayload: Task['items'] = (values.items ?? []).filter(item => !!item.description).map((item, index) => ({
       id: item.id ?? `${Date.now()}-${index}`,
       description: item.description.trim(),
       checked: item.checked,
