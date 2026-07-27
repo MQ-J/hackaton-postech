@@ -133,14 +133,14 @@ export default function TasksList({ onEdit }: TasksListProps) {
             onPress={() => onEdit(item)}
           >
             {
-              item.title && (
+              interfaceMode === 'advanced' && item.title && (
                 <Text style={styles.title} numberOfLines={1}>
                   {item.title}
                 </Text>
               )
             }
             {
-              item.description && (
+              interfaceMode === 'advanced' && item.description && (
                 <Text style={styles.description} numberOfLines={1}>
                   {item.description}
                 </Text>
@@ -178,7 +178,7 @@ export default function TasksList({ onEdit }: TasksListProps) {
         </View>
       </View>
     ),
-    [styles, onEdit, handleDeletePress],
+    [styles, onEdit, handleDeletePress, interfaceMode],
   )
 
   return (

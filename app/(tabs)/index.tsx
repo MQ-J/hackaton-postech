@@ -102,7 +102,7 @@ function createTasksScreenStyles(scaleFont: (baseSize: number) => number, colorC
       position: 'absolute',
       bottom: 28,
       right: 24,
-      width: scaleFont(112),
+      width: scaleFont(120),
       height: scaleFont(45),
       borderRadius: 28,
       borderColor: colorContrast === 'normal' ? undefined : '#f5f5f5',
