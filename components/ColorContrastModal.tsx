@@ -13,7 +13,7 @@ const PRESETS: ColorContrastPreset[] = ['normal', 'high']
 
 const PRESET_DESCRIPTIONS: Record<ColorContrastPreset, string> = {
     normal: 'Contraste padrão do app.',
-    high: 'Maior contraste para leitura e identificação visual.',
+    high: 'Maior contraste.',
 }
 
 interface ColorContrastModalProps {
@@ -46,7 +46,7 @@ export function ColorContrastModal({ visible, onClose }: ColorContrastModalProps
                 <View style={styles.card}>
                     <Text style={[styles.title, { fontSize: scaleFont(18) }]}>Contraste</Text>
                     <Text style={[styles.subtitle, { fontSize: scaleFont(14) }]}>
-                        Escolha um contraste que fique mais claro para você identificar textos e elementos.
+                        Escolha um contraste que fique mais claro para você.
                     </Text>
 
                     <View style={styles.options}>

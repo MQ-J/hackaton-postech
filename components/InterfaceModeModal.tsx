@@ -12,7 +12,7 @@ import Toast from 'react-native-toast-message'
 const PRESETS: InterfaceModePreset[] = ['basic', 'advanced']
 
 const PRESET_DESCRIPTIONS: Record<InterfaceModePreset, string> = {
-    basic: 'Modo mais simples e mais fácil de usar',
+    basic: 'Modo mais simples e mais fácil de usar.',
     advanced: 'Mais recursos e funcionalidades.',
 }
 
@@ -28,7 +28,7 @@ export function InterfaceModeModal({ visible, onClose }: InterfaceModeModalProps
         await setInterfaceMode(preset)
         Toast.show({
             type: 'success',
-            text1: 'Modo de interface atualizado',
+            text1: 'Modo atualizado',
             text2: `Modo ${INTERFACE_MODE_LABELS[preset].toLowerCase()} aplicado.`,
         })
         onClose()
@@ -39,8 +39,8 @@ export function InterfaceModeModal({ visible, onClose }: InterfaceModeModalProps
             <View style={styles.overlay}>
                 <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
                 <View style={styles.card}>
-                    <Text style={[styles.title, { fontSize: scaleFont(18) }]}>Modo da interface</Text>
-                    <Text style={[styles.subtitle, { fontSize: scaleFont(14) }]}>Escolha um estilo de interface que deixe a navegação mais confortável para você.</Text>
+                    <Text style={[styles.title, { fontSize: scaleFont(18) }]}>Modo do aplicativo</Text>
+                    <Text style={[styles.subtitle, { fontSize: scaleFont(14) }]}>Escolha o seu estilo.</Text>
 
                     <View style={styles.options}>
                         {PRESETS.map((preset) => {

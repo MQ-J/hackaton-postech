@@ -56,7 +56,7 @@ export default function UserScreen() {
           <AppLogo />
 
           <PrimaryButton
-            label={`Modo da interface · ${INTERFACE_MODE_LABELS[interfaceMode]}`}
+            label={`Modo · ${INTERFACE_MODE_LABELS[interfaceMode]}`}
             variant="outline"
             onPress={() => setInterfaceModeModalVisible(true)}
             style={styles.userOptionsButton}
@@ -64,7 +64,7 @@ export default function UserScreen() {
           />
 
           <PrimaryButton
-            label={`Tamanho da fonte · ${FONT_PRESET_LABELS[fontPreset]}`}
+            label={`Texto · ${FONT_PRESET_LABELS[fontPreset]}`}
             variant="outline"
             onPress={() => setFontModalVisible(true)}
             style={styles.userOptionsButton}
@@ -77,30 +77,6 @@ export default function UserScreen() {
             onPress={() => setColorContrastModalVisible(true)}
             style={styles.userOptionsButton}
             iconName="contrast-outline"
-          />
-
-          <PrimaryButton
-            label="Espaçamento (em breve)"
-            variant="outline"
-            disabled
-            style={styles.userOptionsButton}
-            iconName="expand-outline"
-          />
-
-          <PrimaryButton
-            label="Feedback reforçado (em breve)"
-            variant="outline"
-            disabled
-            style={styles.userOptionsButton}
-            iconName="notifications-outline"
-          />
-
-          <PrimaryButton
-            label="Exigir confirmação (em breve)"
-            variant="outline"
-            disabled
-            style={styles.userOptionsButton}
-            iconName="shield-checkmark-outline"
           />
 
         </View>

@@ -53,7 +53,7 @@ export default function TasksScreen() {
       <PrimaryButton
         style={styles.fab} onPress={openAdd}
         iconName="add"
-        label="Nova lista"
+        label="Nova tarefa"
       />
 
       {/* Add / Edit Modal */}
@@ -65,7 +65,7 @@ export default function TasksScreen() {
         <SafeAreaView style={styles.modalSafe}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>
-              {editingTask ? 'Editar lista' : 'Nova lista'}
+              {editingTask ? 'Editar tarefa' : 'Nova tarefa'}
             </Text>
             <Pressable onPress={closeModal} style={styles.closeButton}>
               <Ionicons name="close" size={24} color="#333" />

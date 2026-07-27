@@ -28,7 +28,7 @@ export const FONT_PRESET_LABELS: Record<FontSizePreset, string> = {
 
 export const COLOR_CONTRAST_LABELS: Record<ColorContrastPreset, string> = {
   normal: 'Padrão',
-  high: 'Alto contraste',
+  high: 'Alto',
 }
 
 export const INTERFACE_MODE_LABELS: Record<InterfaceModePreset, string> = {

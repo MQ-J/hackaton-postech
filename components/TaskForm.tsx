@@ -207,7 +207,7 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
       }
 
 
-      <Text style={styles.fieldLabel}>Itens da lista</Text>
+      <Text style={styles.fieldLabel}>Itens</Text>
       {fields.map((field, index) => (
         <View key={field.id} style={styles.itemRow}>
           {interfaceMode === 'advanced' && (
@@ -267,7 +267,7 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
       ) : null}
 
       <PrimaryButton
-        label={isEditMode ? 'Salvar alterações' : 'Salvar lista'}
+        label="Salvar"
         onPress={handleSubmit(onSubmit)}
         disabled={isSubmitting}
         style={styles.submitButton}

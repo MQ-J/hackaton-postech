@@ -220,8 +220,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     void persistLocalTasks(next.tasks)
     Toast.show({
       type: 'success',
-      text1: 'Tarefa salva localmente',
-      text2: 'Ela ficará disponível enquanto você não entrar na conta.',
+      text1: 'Tarefa salva com sucesso',
     })
   }
 
@@ -256,7 +255,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
       )
       Toast.show({
         type: 'success',
-        text1: 'Tarefa atualizada com sucesso',
+        text1: 'Tarefa salva com sucesso',
       })
       return
     }
@@ -264,7 +263,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     void persistLocalTasks(next.tasks)
     Toast.show({
       type: 'success',
-      text1: 'Tarefa atualizada localmente',
+      text1: 'Tarefa salva com sucesso',
     })
   }
 

@@ -13,6 +13,7 @@ import {
   Text,
   View,
 } from 'react-native'
+import Toast from 'react-native-toast-message'
 
 /** Itens por página na lista (≤ este número: sem barra de paginação). */
 const TRANSACTIONS_PAGE_SIZE = 10
@@ -117,6 +118,11 @@ export default function TasksList({ onEdit }: TasksListProps) {
       deleteTask(deleteTarget.id)
     }
     closeDeleteModal()
+
+    Toast.show({
+      type: 'success',
+      text1: 'Tarefa excluída com sucesso',
+    })
   }
 
   const renderItem = useCallback(
@@ -186,9 +192,9 @@ export default function TasksList({ onEdit }: TasksListProps) {
       >
         <View style={styles.deleteModalOverlay}>
           <View style={styles.deleteModalCard}>
-            <Text style={styles.deleteModalTitle}>Excluir lista</Text>
+            <Text style={styles.deleteModalTitle}>Excluir tarefa</Text>
             <Text style={styles.deleteModalMessage}>
-              Tem certeza que deseja excluir esta lista? Esta ação não pode ser
+              Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser
               desfeita.
             </Text>
             {deleteTarget ? (
@@ -249,7 +255,7 @@ export default function TasksList({ onEdit }: TasksListProps) {
           ListEmptyComponent={
             <View style={styles.emptyState}>
               <Ionicons name="checkmark-done-outline" style={styles.emptyIcon} />
-              <Text style={styles.emptyText}>Nenhuma lista encontrada</Text>
+              <Text style={styles.emptyText}>Nenhuma tarefa encontrada</Text>
             </View>
           }
         />
