@@ -241,7 +241,7 @@ export default function TasksList({ onEdit }: TasksListProps) {
           renderItem={renderItem}
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <Ionicons name="checkmark-done-outline" size={40} color="#555" />
+              <Ionicons name="checkmark-done-outline" style={styles.emptyIcon} />
               <Text style={styles.emptyText}>Nenhuma lista encontrada</Text>
             </View>
           }
@@ -510,8 +510,12 @@ function createTasksListStyles(scaleFont: (baseSize: number) => number, colorCon
       marginTop: 60,
       gap: 12,
     },
+    emptyIcon: {
+      color: colorContrast === 'normal' ? '#555' : '#fff',
+      fontSize: scaleFont(40),
+    },
     emptyText: {
-      color: '#555',
+      color: colorContrast === 'normal' ? '#555' : '#fff',
       fontSize: scaleFont(15),
     },
     footer: {
