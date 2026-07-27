@@ -55,6 +55,10 @@ export function FontSizeModal({ visible, onClose }: FontSizeModalProps) {
           <View style={styles.options}>
             {PRESETS.map((preset) => {
               const selected = fontPreset === preset
+
+              const fontSize =
+                preset === 'normal' ? 14 : preset === 'large' ? 18 : 22
+
               return (
                 <Pressable
                   key={preset}
@@ -68,7 +72,7 @@ export function FontSizeModal({ visible, onClose }: FontSizeModalProps) {
                     <Text
                       style={[
                         styles.optionLabel,
-                        { fontSize: scaleFont(16) },
+                        { fontSize },
                         selected && styles.optionLabelSelected,
                       ]}
                     >
@@ -81,22 +85,11 @@ export function FontSizeModal({ visible, onClose }: FontSizeModalProps) {
                   <Text
                     style={[
                       styles.optionDescription,
-                      { fontSize: scaleFont(13) },
+                      { fontSize },
                       selected && styles.optionDescriptionSelected,
                     ]}
                   >
                     {PRESET_DESCRIPTIONS[preset]}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.optionSample,
-                      {
-                        fontSize:
-                          preset === 'normal' ? 14 : preset === 'large' ? 18 : 22,
-                      },
-                    ]}
-                  >
-                    Exemplo de texto
                   </Text>
                 </Pressable>
               )
@@ -169,9 +162,5 @@ const styles = StyleSheet.create({
   },
   optionDescriptionSelected: {
     color: '#444',
-  },
-  optionSample: {
-    color: '#333',
-    fontWeight: '500',
   },
 })
