@@ -34,9 +34,6 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Tarefas',
-          headerTitleStyle: {
-
-          },
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'checkmark-done-sharp' : 'checkmark-done-outline'} color={color} style={styles.menuIcon} />
           ),
@@ -46,7 +43,6 @@ export default function TabLayout() {
         name="user"
         options={{
           title: 'Perfil',
-          headerTitleAllowFontScaling: true,
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'person-circle' : 'person-circle-outline'} color={color} style={styles.menuIcon} />
           ),

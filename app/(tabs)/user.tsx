@@ -29,7 +29,7 @@ export default function UserScreen() {
   const [fontModalVisible, setFontModalVisible] = useState(false)
   const [colorContrastModalVisible, setColorContrastModalVisible] = useState(false)
 
-  const styles = useMemo(() => createTasksListStyles(scaleFont, colorContrast), [scaleFont, colorContrast])
+  const styles = useMemo(() => createUserScreenStyles(scaleFont, colorContrast), [scaleFont, colorContrast])
 
   if (!isHydrated) {
     return (
@@ -116,7 +116,7 @@ export default function UserScreen() {
   )
 }
 
-function createTasksListStyles(scaleFont: (baseSize: number) => number, colorContrast: ColorContrastPreset) {
+function createUserScreenStyles(scaleFont: (baseSize: number) => number, colorContrast: ColorContrastPreset) {
   return StyleSheet.create({
     safeRoot: {
       flex: 1,
