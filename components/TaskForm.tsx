@@ -87,15 +87,15 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
       return
     }
 
-    const uid = account.uid ?? auth.currentUser?.uid
-    if (!uid) {
-      Toast.show({
-        type: 'error',
-        text1: 'Sessão inválida',
-        text2: 'Não foi possível identificar o usuário para enviar o arquivo.',
-      })
-      return
-    }
+    // const uid = account.uid ?? auth.currentUser?.uid
+    // if (!uid) {
+    //   Toast.show({
+    //     type: 'error',
+    //     text1: 'Sessão inválida',
+    //     text2: 'Não foi possível identificar o usuário para enviar o arquivo.',
+    //   })
+    //   return
+    // }
 
     const presetId = isEditMode && task ? task.id : Date.now().toString()
 
