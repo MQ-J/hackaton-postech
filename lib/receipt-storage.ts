@@ -7,7 +7,6 @@ import {
 } from 'firebase/storage'
 
 export type UploadReceiptParams = {
-  /** Firebase Auth UID — deve bater com `receipts/{uid}/...` nas Storage Rules. */
   uid: string
   accountNumber: string
   taskId: string

@@ -1,10 +1,10 @@
-import { Stack } from 'expo-router'
-import { StatusBar } from 'expo-status-bar'
-import Toast from 'react-native-toast-message'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
-import { AccountProvider } from '@/contexts/AccountContext'
+import { DinamicStatusBar } from '@/components/DinamicStatusBar'
 import { AccessibilityProvider } from '@/contexts/AccessibilityContext'
+import { AccountProvider } from '@/contexts/AccountContext'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { Stack } from 'expo-router'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
+import Toast from 'react-native-toast-message'
 
 export default function RootLayout() {
   return (
@@ -14,11 +14,10 @@ export default function RootLayout() {
           <AccountProvider>
             <Stack initialRouteName="index">
               <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             </Stack>
             <Toast />
-            <StatusBar style="light" />
+            <DinamicStatusBar />
           </AccountProvider>
         </AuthProvider>
       </AccessibilityProvider>

@@ -12,9 +12,9 @@ import Toast from 'react-native-toast-message'
 const PRESETS: FontSizePreset[] = ['normal', 'large', 'extraLarge']
 
 const PRESET_DESCRIPTIONS: Record<FontSizePreset, string> = {
-  normal: 'Tamanho padrão do app.',
-  large: 'Texto 25% maior — mais confortável para leitura.',
-  extraLarge: 'Texto 50% maior — ideal para quem precisa de mais destaque.',
+  normal: 'Tamanho médio.',
+  large: 'Texto mais confortável.',
+  extraLarge: 'Maior tamanho de texto.',
 }
 
 interface FontSizeModalProps {
@@ -46,15 +46,19 @@ export function FontSizeModal({ visible, onClose }: FontSizeModalProps) {
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
         <View style={styles.card}>
           <Text style={[styles.title, { fontSize: scaleFont(18) }]}>
-            Tamanho da fonte
+            Tamanho do texto
           </Text>
           <Text style={[styles.subtitle, { fontSize: scaleFont(14) }]}>
-            Escolha o tamanho que ficar mais confortável para você ler.
+            Escolha o tamanho que ficar mais confortável para você.
           </Text>
 
           <View style={styles.options}>
             {PRESETS.map((preset) => {
               const selected = fontPreset === preset
+
+              const fontSize =
+                preset === 'normal' ? 14 : preset === 'large' ? 18 : 22
+
               return (
                 <Pressable
                   key={preset}
@@ -68,7 +72,7 @@ export function FontSizeModal({ visible, onClose }: FontSizeModalProps) {
                     <Text
                       style={[
                         styles.optionLabel,
-                        { fontSize: scaleFont(16) },
+                        { fontSize },
                         selected && styles.optionLabelSelected,
                       ]}
                     >
@@ -81,22 +85,11 @@ export function FontSizeModal({ visible, onClose }: FontSizeModalProps) {
                   <Text
                     style={[
                       styles.optionDescription,
-                      { fontSize: scaleFont(13) },
+                      { fontSize },
                       selected && styles.optionDescriptionSelected,
                     ]}
                   >
                     {PRESET_DESCRIPTIONS[preset]}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.optionSample,
-                      {
-                        fontSize:
-                          preset === 'normal' ? 14 : preset === 'large' ? 18 : 22,
-                      },
-                    ]}
-                  >
-                    Exemplo de texto
                   </Text>
                 </Pressable>
               )
@@ -169,9 +162,5 @@ const styles = StyleSheet.create({
   },
   optionDescriptionSelected: {
     color: '#444',
-  },
-  optionSample: {
-    color: '#333',
-    fontWeight: '500',
   },
 })

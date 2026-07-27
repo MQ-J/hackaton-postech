@@ -14,76 +14,52 @@ O **SeniorEase** nasce para resolver isso, promovendo **autonomia, confiança e 
 
 ## ✅ Requisitos do desafio
 
+### Características do projeto
+- visual reforçado
+
 ### Painel de Personalização da Experiência
 - [x] Ajuste de tamanho da fonte
-- [ ] Ajuste de nível de contraste
-- [ ] Ajuste de espaçamento entre elementos
-- [ ] Simplificação da interface (modo básico / modo avançado)
-- [ ] Ativação de feedback visual reforçado
-- [ ] Confirmação adicional antes de ações críticas
+- [X] Ajuste de nível de contraste
+- [X] Simplificação da interface (modo básico / modo avançado)
 
 ### Organizador de Atividades Simplificado
 - [x] Lista de tarefas com visual simples e direto
-- [ ] Etapas guiadas para execução de atividades
-- [ ] Lembretes com linguagem clara
-- [ ] Avisos de conclusão com feedback positivo
-- [ ] Histórico simples de atividades realizadas
+- [X] Histórico simples de atividades realizadas
 
 ### Perfil do Usuário + Configurações Persistentes
-- [ ] Tamanho de fonte escolhido
-- [ ] Nível de contraste
-- [ ] Modo de navegação (simplificado ou padrão)
-- [ ] Necessidade de confirmações extras
-- [ ] Preferências de lembretes e notificações
+- [X] Tamanho de fonte escolhido
+- [X] Nível de contraste
+- [X] Modo de navegação (modo básico / modo avançado)
 
 ### Arquitetura
-- [ ] Separação clara entre módulos (painel, tarefas, perfil, configurações)
-- [ ] Comunicação entre microapps (se utilizado)
-- [ ] Camada de domínio isolada (Clean Architecture)
-- [ ] Casos de uso independentes de UI
-- [ ] Adaptadores e interfaces bem definidos
+- [X] Separação clara entre módulos (tarefas e perfil)
+- [X] Adaptadores e interfaces bem definidos
 
 ### Acessibilidade para Idosos (obrigatório)
-- [ ] Ajustes reais de legibilidade (fonte, contraste, espaçamento)
-- [ ] Botões e áreas clicáveis ampliadas
-- [ ] Feedback claro após cada ação
-- [ ] Redução de complexidade visual
-- [ ] Navegação previsível
-- [ ] Fluxos guiados passo a passo
-- [ ] Animações suaves e controláveis
+- [X] Ajustes reais de legibilidade (fonte, contraste, espaçamento)
+- [X] Botões e áreas clicáveis ampliadas
+- [X] Redução de complexidade visual
+- [X] Navegação previsível
+- [X] Animações suaves
 
 ### Material para a entrega
-- [ ] Link do(s) repositório(s) Git do projeto (Web e Mobile)
-- [ ] README com tecnologias utilizadas e passo a passo para rodar localmente
+- [X] Link do(s) repositório(s) Git do projeto (Web e Mobile)
+- [X] README com tecnologias utilizadas e passo a passo para rodar localmente
 - [ ] Vídeo explicativo (até 15 min) demonstrando decisões e features
 - [ ] Link do vídeo e do projeto em arquivo `.docx` ou `.txt` na plataforma FIAP
 
 ---
 
-## 🧱 Arquitetura em camadas
-
-Camadas seguindo **Clean Architecture**, compartilhadas conceitualmente entre Web e Mobile:
-
-- **Domain** — entidades e casos de uso (regras de negócio, independentes de UI/framework)
-- **Data / Infra** — implementações concretas de repositórios, integração com backend
-- **Presentation** — telas, componentes e state management
-- **Shared / Core** — configurações de acessibilidade, temas e utilitários comuns
-
----
-
 ## ✨ Módulos principais
 
-### 🎛️ Painel de Personalização
-Módulo responsável por permitir que o usuário ajuste fonte, contraste, espaçamento e nível de simplificação da interface. As preferências são persistidas no perfil do usuário e aplicadas globalmente na aplicação.
+### 🎛️ Painel de Personalização (tab 'Perfil')
+Módulo responsável por permitir que o usuário ajuste fonte, contraste e nível de simplificação da interface. As preferências são persistidas no perfil do usuário e aplicadas globalmente na aplicação.
 
-### 🗂️ Organizador de Atividades
-Módulo de tarefas com fluxo guiado passo a passo, linguagem simples, lembretes e feedback positivo após conclusão de cada etapa.
+### 🗂️ Organizador de Atividades (tab 'Tarefas')
+Módulo de tarefas com linguagem simples.
 
-### 👤 Perfil e Configurações
-Módulo responsável por armazenar e sincronizar as preferências de acessibilidade e notificação do usuário entre sessões e dispositivos.
-
-### ♿ Core de Acessibilidade
-Camada compartilhada com tokens de design (tipografia, contraste, espaçamento) consumidos por todos os módulos, garantindo coerência visual e cognitiva entre Web e Mobile.
+### ♿ Core de Acessibilidade (useAccessibility)
+Camada compartilhada com tokens de design (tipografia, contraste) consumidos por todos os módulos, garantindo coerência visual e cognitiva entre Web e Mobile.
 
 ---
 
@@ -113,10 +89,8 @@ Camada compartilhada com tokens de design (tipografia, contraste, espaçamento) 
 | **Arquitetura** | Clean Architecture (Domain / Data / Presentation), módulos independentes |
 | **Estado** | Context API / hooks de estado por módulo |
 | **Formulários e validação** | React Hook Form, Zod |
-| **Backend / cloud** | Firebase (Auth, Firestore, Storage) |
 | **Acessibilidade** | Tokens de design (fonte, contraste, espaçamento), `react-native-safe-area-context`, ARIA (web) |
 | **UI e feedback** | Componentes de feedback visual reforçado, animações suaves e controláveis |
-| **Testes** | Jest / Testing Library |
 | **CI/CD** | GitHub Actions |
 
 ---
@@ -156,31 +130,24 @@ npx expo start
 
 Utilize o QR code no terminal para abrir no **Expo Go** ou as teclas do CLI para abrir em **web**, **Android** ou **iOS**.
 
-### Firebase (backend compartilhado)
-
-1. Crie um projeto no [Firebase Console](https://console.firebase.google.com/) e ative **Authentication**, **Firestore** e **Storage**.
-2. Copie as chaves do SDK para o arquivo de configuração de cada app (web e mobile).
-3. Configure as **regras do Firestore** e **Storage** para as coleções de perfil, preferências de acessibilidade e atividades.
-
 ---
 
-## 📂 Estrutura do projeto (proposta)
+## 📂 Estrutura do projeto
 
 ```text
 seniorease/
-├── apps/
-│   ├── web/                     # Aplicação Next.js
-│   └── mobile/                  # Aplicação Expo / React Native
-├── packages/
-│   ├── domain/                  # Entidades e casos de uso (Clean Architecture)
-│   ├── data/                    # Repositórios e integração com Firebase
-│   └── shared-ui/               # Tokens de acessibilidade e componentes compartilhados
-├── docs/
-│   └── firebase.md              # Documentação Firebase / modelo de dados
-└── README.md                    # Documentação do projeto
+├── app/                      # Telas, rotas e navegação do Expo Router
+├── assets/                   # Imagens e recursos estáticos
+├── components/               # Componentes reutilizáveis da interface
+├── constants/                # Constantes para cálculo de layout
+├── contexts/                 # Contextos de autenticação, conta e acessibilidade
+├── docs/                     # Documentação complementar
+├── firebase/                 # Configuração e integração com Firebase
+├── hooks/                    # Hooks utilitários e personalizados
+├── lib/                      # Helpers, tipos e lógica de apoio
+├── package.json              # Dependências e scripts do projeto
+└── README.md                 # Documentação principal
 ```
-
-> Estrutura sugerida para monorepo. Caso os times optem por repositórios separados para Web e Mobile, mantenha a mesma organização interna (domain / data / presentation) em cada um.
 
 ---
 
@@ -188,10 +155,8 @@ seniorease/
 
 ### Web
 ```bash
-npm run dev       # Inicia o servidor de desenvolvimento
-npm run build     # Build de produção
+npm run web       # Inicia e abre no navegador
 npm run lint      # Executa linting
-npm run test      # Executa os testes
 ```
 
 ### Mobile (Expo)
@@ -199,14 +164,8 @@ npm run test      # Executa os testes
 npm run start     # Inicia o Expo (npx expo start)
 npm run android   # Inicia e abre no emulador/dispositivo Android
 npm run ios       # Inicia e abre no simulador/dispositivo iOS
-npm run web       # Inicia e abre no navegador
 npm run lint      # Executa linting (expo lint)
 npx expo start -c # Inicia o Expo limpando o cache
 ```
 
 ---
-
-## 🎥 Entrega
-
-- Repositório(s) Git: `<link>`
-- Vídeo demonstrativo (até 15 min): `<link>`

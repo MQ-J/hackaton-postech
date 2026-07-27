@@ -1,7 +1,7 @@
 import { PrimaryButton } from '@/components/PrimaryButton'
 import {
-    COLOR_CONTRAST_LABELS,
-    type ColorContrastPreset,
+    INTERFACE_MODE_LABELS,
+    type InterfaceModePreset,
     useAccessibility,
 } from '@/contexts/AccessibilityContext'
 import { theme } from '@/theme/colors'
@@ -9,49 +9,42 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 import Toast from 'react-native-toast-message'
 
-const PRESETS: ColorContrastPreset[] = ['normal', 'high']
+const PRESETS: InterfaceModePreset[] = ['basic', 'advanced']
 
-const PRESET_DESCRIPTIONS: Record<ColorContrastPreset, string> = {
-    normal: 'Contraste padrão do app.',
-    high: 'Maior contraste.',
+const PRESET_DESCRIPTIONS: Record<InterfaceModePreset, string> = {
+    basic: 'Modo mais simples e mais fácil de usar.',
+    advanced: 'Mais recursos e funcionalidades.',
 }
 
-interface ColorContrastModalProps {
+interface InterfaceModeModalProps {
     visible: boolean
     onClose: () => void
 }
 
-export function ColorContrastModal({ visible, onClose }: ColorContrastModalProps) {
-    const { colorContrast, setColorContrast, scaleFont } = useAccessibility()
+export function InterfaceModeModal({ visible, onClose }: InterfaceModeModalProps) {
+    const { interfaceMode, setInterfaceMode, scaleFont } = useAccessibility()
 
-    const handleSelect = async (preset: ColorContrastPreset) => {
-        await setColorContrast(preset)
+    const handleSelect = async (preset: InterfaceModePreset) => {
+        await setInterfaceMode(preset)
         Toast.show({
             type: 'success',
-            text1: 'Contraste atualizado',
-            text2: `Modo ${COLOR_CONTRAST_LABELS[preset].toLowerCase()} aplicado.`,
+            text1: 'Modo atualizado',
+            text2: `Modo ${INTERFACE_MODE_LABELS[preset].toLowerCase()} aplicado.`,
         })
         onClose()
     }
 
     return (
-        <Modal
-            visible={visible}
-            transparent
-            animationType="fade"
-            onRequestClose={onClose}
-        >
+        <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
             <View style={styles.overlay}>
                 <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
                 <View style={styles.card}>
-                    <Text style={[styles.title, { fontSize: scaleFont(18) }]}>Contraste</Text>
-                    <Text style={[styles.subtitle, { fontSize: scaleFont(14) }]}>
-                        Escolha um contraste que fique mais claro para você.
-                    </Text>
+                    <Text style={[styles.title, { fontSize: scaleFont(18) }]}>Modo do aplicativo</Text>
+                    <Text style={[styles.subtitle, { fontSize: scaleFont(14) }]}>Escolha o seu estilo.</Text>
 
                     <View style={styles.options}>
                         {PRESETS.map((preset) => {
-                            const selected = colorContrast === preset
+                            const selected = interfaceMode === preset
                             return (
                                 <Pressable
                                     key={preset}
@@ -59,7 +52,7 @@ export function ColorContrastModal({ visible, onClose }: ColorContrastModalProps
                                     onPress={() => void handleSelect(preset)}
                                     accessibilityRole="button"
                                     accessibilityState={{ selected }}
-                                    accessibilityLabel={`${COLOR_CONTRAST_LABELS[preset]}${selected ? ', selecionado' : ''}`}
+                                    accessibilityLabel={`${INTERFACE_MODE_LABELS[preset]}${selected ? ', selecionado' : ''}`}
                                 >
                                     <View style={styles.optionHeader}>
                                         <Text
@@ -69,7 +62,7 @@ export function ColorContrastModal({ visible, onClose }: ColorContrastModalProps
                                                 selected && styles.optionLabelSelected,
                                             ]}
                                         >
-                                            {COLOR_CONTRAST_LABELS[preset]}
+                                            {INTERFACE_MODE_LABELS[preset]}
                                         </Text>
                                         {selected ? (
                                             <Ionicons name="checkmark-circle" size={22} color={theme.defaultHome} />
@@ -84,14 +77,6 @@ export function ColorContrastModal({ visible, onClose }: ColorContrastModalProps
                                     >
                                         {PRESET_DESCRIPTIONS[preset]}
                                     </Text>
-                                    <View
-                                        style={[
-                                            styles.sampleBox,
-                                            preset === 'high' && styles.sampleBoxHigh,
-                                        ]}
-                                    >
-                                        <Text style={styles.sampleText}>Exemplo de texto</Text>
-                                    </View>
                                 </Pressable>
                             )
                         })}
@@ -163,19 +148,5 @@ const styles = StyleSheet.create({
     },
     optionDescriptionSelected: {
         color: '#444',
-    },
-    sampleBox: {
-        borderRadius: 8,
-        paddingVertical: 10,
-        paddingHorizontal: 12,
-        backgroundColor: '#1e2329',
-        alignItems: 'flex-start',
-    },
-    sampleBoxHigh: {
-        backgroundColor: '#0B0B0E',
-    },
-    sampleText: {
-        color: '#fff',
-        fontWeight: '600',
     },
 })

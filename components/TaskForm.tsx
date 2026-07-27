@@ -7,6 +7,9 @@ import {
 } from '@/lib/task-schema'
 import type { Task } from '@/lib/types'
 import { theme } from '@/theme/colors'
+import {
+  Ionicons,
+} from '@expo/vector-icons'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useMemo } from 'react'
 import {
@@ -33,7 +36,7 @@ interface TaskFormProps {
 }
 
 export function TaskForm({ task, onSuccess }: TaskFormProps) {
-  const { scaleFont, colorContrast } = useAccessibility()
+  const { scaleFont, colorContrast, interfaceMode } = useAccessibility()
   const { account, addTask, updateTask } = useAccount()
   const isEditMode = Boolean(task)
 
@@ -43,6 +46,7 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
 
   const {
     control,
+    watch,
     handleSubmit,
     setFocus,
     reset,
@@ -58,6 +62,8 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
       })) || [{ description: '', checked: false }],
     },
   })
+
+  const watchedItems = watch('items') ?? []
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -103,16 +109,6 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
       return
     }
 
-    // const uid = account.uid ?? auth.currentUser?.uid
-    // if (!uid) {
-    //   Toast.show({
-    //     type: 'error',
-    //     text1: 'Sessão inválida',
-    //     text2: 'Não foi possível identificar o usuário para enviar o arquivo.',
-    //   })
-    //   return
-    // }
-
     const presetId = isEditMode && task ? task.id : Date.now().toString()
 
     const itemsPayload: Task['items'] = (values.items ?? []).filter(item => !!item.description).map((item, index) => ({
@@ -155,51 +151,80 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
       contentContainerStyle={styles.container}
       keyboardShouldPersistTaps="handled"
     >
+
       {/* Title */}
-      <Text style={styles.fieldLabel}>Título (opcional)</Text>
-      <Controller
-        control={control}
-        name="title"
-        render={({ field: { value, onChange, onBlur } }) => (
-          <TextInput
-            style={[styles.input, errors.title && styles.inputError]}
-            value={value}
-            onChangeText={onChange}
-            onBlur={onBlur}
-            placeholder="Título da tarefa"
-            placeholderTextColor={placeholderTextColor}
-            maxLength={120}
-          />
-        )}
-      />
-      {errors.title && (
-        <Text style={styles.errorText}>{errors.title.message}</Text>
-      )}
+      {
+        interfaceMode === 'advanced' && (
+          <>
+            <Text style={styles.fieldLabel}>Título (opcional)</Text>
+            <Controller
+              control={control}
+              name="title"
+              render={({ field: { value, onChange, onBlur } }) => (
+                <TextInput
+                  style={[styles.input, errors.title && styles.inputError]}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  placeholder="Título da tarefa"
+                  placeholderTextColor={placeholderTextColor}
+                  maxLength={120}
+                />
+              )}
+            />
+            {errors.title && (
+              <Text style={styles.errorText}>{errors.title.message}</Text>
+            )}
+          </>
+        )
+      }
 
       {/* Description */}
-      {/* <Text style={styles.fieldLabel}>Descrição (opcional)</Text>
-      <Controller
-        control={control}
-        name="description"
-        render={({ field: { value, onChange, onBlur } }) => (
-          <TextInput
-            style={[styles.input, errors.description && styles.inputError]}
-            value={value}
-            onChangeText={onChange}
-            onBlur={onBlur}
-            placeholder="Descrição da tarefa"
-            placeholderTextColor="#999"
-            maxLength={120}
-          />
-        )}
-      />
-      {errors.description && (
-        <Text style={styles.errorText}>{errors.description.message}</Text>
-      )} */}
+      {
+        interfaceMode === 'advanced' && (
+          <>
+            <Text style={styles.fieldLabel}>Descrição (opcional)</Text>
+            <Controller
+              control={control}
+              name="description"
+              render={({ field: { value, onChange, onBlur } }) => (
+                <TextInput
+                  style={[styles.input, errors.description && styles.inputError]}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  placeholder="Descrição da tarefa"
+                  placeholderTextColor={placeholderTextColor}
+                  maxLength={120}
+                />
+              )}
+            />
+            {errors.description && (
+              <Text style={styles.errorText}>{errors.description.message}</Text>
+            )}
+          </>
+        )
+      }
 
-      <Text style={styles.fieldLabel}>Itens da lista</Text>
+
+      <Text style={styles.fieldLabel}>Itens</Text>
       {fields.map((field, index) => (
         <View key={field.id} style={styles.itemRow}>
+          {interfaceMode === 'advanced' && (
+            <Controller
+              control={control}
+              name={`items.${index}.checked`}
+              render={({ field: { value, onChange } }) => (
+                <Pressable
+                  onPress={() => onChange(!value)}
+                  style={[styles.checkbox, value && styles.checkboxChecked]}
+                >
+                  {value ? <Ionicons name="checkmark" size={14} color="#fff" /> : null}
+                </Pressable>
+              )}
+            />
+          )}
+
           <Controller
             control={control}
             name={`items.${index}.description`}
@@ -209,6 +234,7 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
                 style={[
                   styles.input,
                   styles.itemInput,
+                  interfaceMode === 'advanced' && watchedItems[index]?.checked && styles.itemCompleted,
                   errors.items?.[index]?.description && styles.inputError,
                 ]}
                 value={value}
@@ -241,7 +267,7 @@ export function TaskForm({ task, onSuccess }: TaskFormProps) {
       ) : null}
 
       <PrimaryButton
-        label={isEditMode ? 'Salvar alterações' : 'Salvar lista'}
+        label="Salvar"
         onPress={handleSubmit(onSubmit)}
         disabled={isSubmitting}
         style={styles.submitButton}
@@ -344,6 +370,24 @@ function createTaskFormStyles(scaleFont: (baseSize: number) => number, colorCont
     },
     itemInput: {
       flex: 1,
+    },
+    itemCompleted: {
+      textDecorationLine: 'line-through',
+      color: '#666',
+    },
+    checkbox: {
+      width: 24,
+      height: 24,
+      borderRadius: 6,
+      borderWidth: 2,
+      borderColor: theme.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 8,
+    },
+    checkboxChecked: {
+      backgroundColor: theme.primary,
+      borderColor: theme.primary,
     },
     addButton: {
       paddingVertical: 8,

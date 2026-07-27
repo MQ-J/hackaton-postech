@@ -1,12 +1,14 @@
+import { AppLogo } from '@/components/AppLogo'
 import { ColorContrastModal } from '@/components/ColorContrastModal'
 import { FontSizeModal } from '@/components/FontSizeModal'
-import { Greeting } from '@/components/Greeting'
+import { InterfaceModeModal } from '@/components/InterfaceModeModal'
 import { PrimaryButton } from '@/components/PrimaryButton'
 import { MAX_CONTENT_WIDTH } from '@/constants/layout'
 import {
   COLOR_CONTRAST_LABELS,
   ColorContrastPreset,
   FONT_PRESET_LABELS,
+  INTERFACE_MODE_LABELS,
   useAccessibility,
 } from '@/contexts/AccessibilityContext'
 import { useAccount } from '@/contexts/AccountContext'
@@ -22,10 +24,11 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function UserScreen() {
   const { isHydrated } = useAccount()
-  const { scaleFont, fontPreset, colorContrast } = useAccessibility()
+  const { scaleFont, fontPreset, colorContrast, interfaceMode } = useAccessibility()
   const { width } = useWindowDimensions()
   const contentWidth = Math.min(width - 32, MAX_CONTENT_WIDTH)
   const centered = width > MAX_CONTENT_WIDTH
+  const [interfaceModeModalVisible, setInterfaceModeModalVisible] = useState(false)
   const [fontModalVisible, setFontModalVisible] = useState(false)
   const [colorContrastModalVisible, setColorContrastModalVisible] = useState(false)
 
@@ -50,18 +53,18 @@ export default function UserScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={[styles.content, { width: contentWidth }]}>
-          <Greeting />
+          <AppLogo />
 
           <PrimaryButton
-            label="Modo da interface (em breve)"
+            label={`Modo · ${INTERFACE_MODE_LABELS[interfaceMode]}`}
             variant="outline"
-            disabled
+            onPress={() => setInterfaceModeModalVisible(true)}
             style={styles.userOptionsButton}
             iconName="layers-outline"
           />
 
           <PrimaryButton
-            label={`Tamanho da fonte · ${FONT_PRESET_LABELS[fontPreset]}`}
+            label={`Texto · ${FONT_PRESET_LABELS[fontPreset]}`}
             variant="outline"
             onPress={() => setFontModalVisible(true)}
             style={styles.userOptionsButton}
@@ -76,32 +79,13 @@ export default function UserScreen() {
             iconName="contrast-outline"
           />
 
-          <PrimaryButton
-            label="Espaçamento (em breve)"
-            variant="outline"
-            disabled
-            style={styles.userOptionsButton}
-            iconName="expand-outline"
-          />
-
-          <PrimaryButton
-            label="Feedback reforçado (em breve)"
-            variant="outline"
-            disabled
-            style={styles.userOptionsButton}
-            iconName="notifications-outline"
-          />
-
-          <PrimaryButton
-            label="Exigir confirmação (em breve)"
-            variant="outline"
-            disabled
-            style={styles.userOptionsButton}
-            iconName="shield-checkmark-outline"
-          />
-
         </View>
       </ScrollView>
+
+      <InterfaceModeModal
+        visible={interfaceModeModalVisible}
+        onClose={() => setInterfaceModeModalVisible(false)}
+      />
 
       <FontSizeModal
         visible={fontModalVisible}
