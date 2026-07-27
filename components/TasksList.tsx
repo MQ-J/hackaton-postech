@@ -11,7 +11,6 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native'
 
@@ -28,7 +27,6 @@ export default function TasksList({ onEdit }: TasksListProps) {
 
   const styles = useMemo(() => createTasksListStyles(scaleFont), [scaleFont])
 
-  const [search, setSearch] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<Task | null>(null)
   const [deleteModalVisible, setDeleteModalVisible] = useState(false)
   const deleteModalClearWebTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -47,15 +45,8 @@ export default function TasksList({ onEdit }: TasksListProps) {
     if (!account) return []
     let list = account.tasks
 
-    if (search.trim()) {
-      const q = search.trim().toLowerCase()
-      list = list.filter((t) => t.description &&
-        (t.description).toLowerCase().includes(q),
-      )
-    }
-
     return list
-  }, [account, search])
+  }, [account])
 
   const totalPages = Math.max(
     1,
@@ -70,11 +61,6 @@ export default function TasksList({ onEdit }: TasksListProps) {
     const start = (currentPage - 1) * TRANSACTIONS_PAGE_SIZE
     return localFiltered.slice(start, start + TRANSACTIONS_PAGE_SIZE)
   }, [localFiltered, currentPage, showPagination])
-
-  const filterKey = `${search}`
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [filterKey])
 
   useEffect(() => {
     if (currentPage > totalPages) {
@@ -245,29 +231,6 @@ export default function TasksList({ onEdit }: TasksListProps) {
         </View>
       </Modal>
 
-      <View style={styles.searchRow}>
-        <Ionicons name="search-outline" size={16} color="#666" style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          value={search}
-          onChangeText={setSearch}
-          placeholder="Buscar por descrição..."
-          placeholderTextColor="#555"
-        />
-        {search.length > 0 && (
-          <Pressable onPress={() => setSearch('')}>
-            <Ionicons name="close-circle" size={16} color="#666" />
-          </Pressable>
-        )}
-      </View>
-
-      <View style={styles.resultRow}>
-        <Text style={styles.resultCount}>
-          {localFiltered.length}{' '}
-          {localFiltered.length === 1 ? 'lista' : 'listas'}
-        </Text>
-      </View>
-
       <View style={styles.listWrapper}>
         <FlatList
           ref={listRef}
@@ -336,6 +299,7 @@ function createTasksListStyles(scaleFont: (baseSize: number) => number) {
       flex: 1,
     },
     listWrapper: {
+      marginTop: 24,
       flex: 1,
     },
     list: {
@@ -371,28 +335,6 @@ function createTasksListStyles(scaleFont: (baseSize: number) => number) {
     listContent: {
       flexGrow: 1,
       paddingBottom: 24,
-    },
-    searchRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginHorizontal: 16,
-      marginTop: 24,
-      marginBottom: 4,
-      borderWidth: 1,
-      borderColor: '#444',
-      borderRadius: 10,
-      backgroundColor: '#1a1e23',
-      paddingHorizontal: 10,
-      paddingVertical: 6,
-      gap: 8,
-    },
-    searchIcon: {
-      marginRight: 2,
-    },
-    searchInput: {
-      flex: 1,
-      fontSize: scaleFont(14),
-      color: '#eee',
     },
     chipsScroll: {
       flexGrow: 0,
@@ -467,14 +409,6 @@ function createTasksListStyles(scaleFont: (baseSize: number) => number) {
     },
     dateClear: {
       padding: 4,
-    },
-    resultRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingBottom: 8,
-      paddingTop: 4,
     },
     resultCount: {
       fontSize: scaleFont(12),
