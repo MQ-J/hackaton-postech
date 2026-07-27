@@ -155,12 +155,11 @@ export default function TasksList({ onEdit }: TasksListProps) {
         </View>
         <View style={styles.itemRight}>
           <View style={styles.actionRow}>
-            {/* <Ionicons name="pencil-outline" size={14} color="#1d4ed8" /> */}
             <Pressable
-              style={[styles.actionButton, styles.deleteButton]}
+              style={[styles.deleteButton]}
               onPress={() => handleDeletePress(item)}
             >
-              <Ionicons name="trash-outline" size={14} color="#dc2626" />
+              <Ionicons name="trash-outline" style={styles.deleteButtonIcon} color="#dc2626" />
             </Pressable>
           </View>
         </View>
@@ -491,14 +490,20 @@ function createTasksListStyles(scaleFont: (baseSize: number) => number) {
       flexDirection: 'row',
       gap: 6,
     },
-    actionButton: {
+    deleteButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: scaleFont(40),
+      height: scaleFont(40),
       padding: 6,
       borderRadius: 6,
       borderWidth: 1,
-    },
-    deleteButton: {
       borderColor: '#dc2626',
       backgroundColor: 'rgba(220,38,38,0.1)',
+    },
+    deleteButtonIcon: {
+      fontSize: scaleFont(14),
     },
     emptyState: {
       alignItems: 'center',
