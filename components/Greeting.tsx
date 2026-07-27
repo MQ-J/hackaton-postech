@@ -1,5 +1,5 @@
-import { useAccount } from "@/contexts/AccountContext";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
+import { useAccount } from "@/contexts/AccountContext";
 import { useAnimate } from "@/hooks/useAnimate";
 import { useMemo } from "react";
 import { Animated, StyleSheet, Text } from "react-native";
@@ -47,7 +47,7 @@ export function Greeting() {
                 { opacity, transform: [{ translateY }] },
             ]}
         >
-            <Text style={styles.greeting}>Olá, {firstName}!</Text>
+            <Text style={styles.greeting}>{firstName ? `Olá, ${firstName}!` : 'Olá!'}</Text>
             <Text style={styles.date}>{getGreeting()}</Text>
         </Animated.View>
     )
