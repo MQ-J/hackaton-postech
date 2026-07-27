@@ -1,9 +1,11 @@
+import { PrimaryButton } from '@/components/PrimaryButton';
 import { TaskForm } from '@/components/TaskForm';
 import TasksList from '@/components/TasksList';
+import { useAccessibility } from '@/contexts/AccessibilityContext';
 import { useAnimate } from '@/hooks/useAnimate';
 import type { Task } from '@/lib/types';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Animated,
   Modal,
@@ -19,6 +21,9 @@ export default function TasksScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [hasOpenedModal, setHasOpenedModal] = useState(false);
+  const { scaleFont } = useAccessibility()
+
+  const styles = useMemo(() => createTasksScreenStyles(scaleFont), [scaleFont])
 
   const { opacity, translateY } = useAnimate()
 
@@ -45,10 +50,11 @@ export default function TasksScreen() {
         <TasksList onEdit={openEdit} />
       </Animated.View>
 
-      {/* FAB */}
-      <Pressable style={styles.fab} onPress={openAdd}>
-        <Ionicons name="add" size={28} color="#25292e" /> <Text>Nova lista</Text>
-      </Pressable>
+      <PrimaryButton
+        style={styles.fab} onPress={openAdd}
+        iconName="add"
+        label="Nova lista"
+      />
 
       {/* Add / Edit Modal */}
       <Modal
@@ -82,54 +88,56 @@ export default function TasksScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeRoot: {
-    flex: 1,
-    backgroundColor: '#25292e',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#25292e',
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 28,
-    right: 24,
-    width: 105,
-    height: 45,
-    borderRadius: 28,
-    backgroundColor: '#ffd33d',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 6,
-  },
-  modalSafe: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111',
-  },
-  closeButton: {
-    padding: 4,
-  },
-  modalBody: {
-    padding: 20,
-  },
-});
+function createTasksScreenStyles(scaleFont: (baseSize: number) => number) {
+  return StyleSheet.create({
+    safeRoot: {
+      flex: 1,
+      backgroundColor: '#25292e',
+    },
+    container: {
+      flex: 1,
+      backgroundColor: '#25292e',
+    },
+    fab: {
+      position: 'absolute',
+      bottom: 28,
+      right: 24,
+      width: scaleFont(112),
+      height: scaleFont(45),
+      borderRadius: 28,
+      backgroundColor: '#ffd33d',
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 4,
+      elevation: 6,
+    },
+    modalSafe: {
+      flex: 1,
+      backgroundColor: '#f5f5f5',
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
+      paddingVertical: 16,
+      backgroundColor: '#fff',
+      borderBottomWidth: 1,
+      borderBottomColor: '#e5e7eb',
+    },
+    modalTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: '#111',
+    },
+    closeButton: {
+      padding: 4,
+    },
+    modalBody: {
+      padding: 20,
+    },
+  })
+}
