@@ -45,8 +45,8 @@ O **SeniorEase** nasce para resolver isso, promovendo **autonomia, confiança e 
 ### Material para a entrega
 - [X] Link do(s) repositório(s) Git do projeto (Web e Mobile)
 - [X] README com tecnologias utilizadas e passo a passo para rodar localmente
-- [ ] Vídeo explicativo (até 15 min) demonstrando decisões e features
-- [ ] Link do vídeo e do projeto em arquivo `.docx` ou `.txt` na plataforma FIAP
+- [X] Vídeo explicativo (até 15 min) demonstrando decisões e features
+- [X] Link do vídeo e do projeto em arquivo `.docx` ou `.txt` na plataforma FIAP
 
 ---
 
